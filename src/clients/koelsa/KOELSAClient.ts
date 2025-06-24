@@ -3,6 +3,13 @@ import { ApiProviderInfo } from "../base/types";
 import { ClientConfig } from "../../types/common";
 import { ElevatorInstallationService } from "./services/ElevatorInstallationService";
 import { ElevatorInspectResultService } from "./services/ElevatorInspectResultService";
+import { 
+  ValidationError, 
+  ApiError, 
+  NetworkError, 
+  ServiceUnavailableError,
+  KOELSAServiceError
+} from "../../errors";
 
 /**
  * Korea Elevator Safety Agency (KOELSA) API client
@@ -16,7 +23,7 @@ export class KOELSAClient extends BaseClient {
   /**
    * Elevator inspection result service
    */
-  public readonly inspectResult: ElevatorInspectResultService;
+  public readonly inspection: ElevatorInspectResultService;
 
   /**
    * API provider information
@@ -25,7 +32,7 @@ export class KOELSAClient extends BaseClient {
     name: "Korea Elevator Safety Agency",
     description:
       "Public agency responsible for elevator safety management and inspection",
-    baseURL: "http://openapi.elevator.go.kr",
+    baseURL: "https://apis.data.go.kr/",
     websiteURL: "https://home.koelsa.or.kr",
     documentationURL: "https://www.data.go.kr",
   };
@@ -42,7 +49,7 @@ export class KOELSAClient extends BaseClient {
 
     // Create service instances
     this.installation = new ElevatorInstallationService(this.httpClient);
-    this.inspectResult = new ElevatorInspectResultService(this.httpClient);
+    this.inspection = new ElevatorInspectResultService(this.httpClient);
   }
 
   /**
@@ -55,7 +62,7 @@ export class KOELSAClient extends BaseClient {
   } {
     return {
       provider: KOELSAClient.providerInfo,
-      services: [this.installation.serviceName, this.inspectResult.serviceName],
+      services: [this.installation.serviceName, this.inspection.serviceName],
       config: this.getConfig(),
     };
   }
@@ -74,7 +81,20 @@ export class KOELSAClient extends BaseClient {
       });
       return true;
     } catch (error) {
-      console.warn("KOELSA API health check failed:", error);
+      // 구체적인 에러 타입별 처리
+      if (error instanceof ValidationError) {
+        console.warn("KOELSA health check - 유효성 검사 실패:", error.message, error.field);
+      } else if (error instanceof ApiError) {
+        console.warn("KOELSA health check - API 오류:", error.message, "상태코드:", error.statusCode);
+      } else if (error instanceof NetworkError) {
+        console.warn("KOELSA health check - 네트워크 오류:", error.message);
+      } else if (error instanceof ServiceUnavailableError) {
+        console.warn("KOELSA health check - 서비스 이용 불가:", error.message);
+      } else if (error instanceof KOELSAServiceError) {
+        console.warn("KOELSA health check - KOELSA 서비스 오류:", error.message, "엔드포인트:", error.serviceEndpoint);
+      } else {
+        console.warn("KOELSA health check - 알 수 없는 오류:", error);
+      }
       return false;
     }
   }

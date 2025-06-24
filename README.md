@@ -14,9 +14,11 @@ Korea Public SDK provides a comprehensive, type-safe interface for accessing Kor
 - [Features](#features)
 - [Supported Agencies](#supported-agencies)
 - [Installation](#installation)
+- [Service Key Setup](#service-key-setup)
 - [Quick Start](#quick-start)
 - [API Documentation](#api-documentation)
 - [Error Handling](#error-handling)
+- [API Status Monitoring](#api-status-monitoring)
 - [Configuration](#configuration)
 - [Development](#development)
 - [Contributing](#contributing)
@@ -58,48 +60,100 @@ npm install korea-public-sdk
 - Node.js 16.0 or higher
 - TypeScript 5.0 or higher (for TypeScript projects)
 
+## Service Key Setup
+
+To use this SDK, you need to obtain service keys from the Korean Public Data Portal.
+
+### Step 1: Account Registration
+
+1. Visit [Korean Public Data Portal](https://www.data.go.kr)
+2. Create a free account
+3. Complete identity verification
+
+### Step 2: API Application
+
+1. Search for APIs you want to use:
+   - Search "승강기 설치정보" for Elevator Installation Information
+   - Search "승강기 검사신청결과" for Elevator Inspection Results
+2. Click "활용신청" (Apply for Use) for each API
+3. Fill out the application form with:
+   - Purpose of use
+   - Usage period
+   - Expected traffic volume
+
+### Step 3: Approval Process
+
+- Applications are typically approved within 1-2 business days
+- You will receive email notifications for approval status
+- Some APIs may require additional documentation
+
+### Step 4: Service Key Access
+
+1. Go to "마이페이지" (My Page) → "개발계정" (Developer Account)
+2. Find your approved APIs and copy the service keys
+3. Each API has its own unique service key
+
+### Usage Limitations
+
+- **Rate Limits**: Most APIs have daily request limits (typically 1,000-10,000 calls)
+- **Key Security**: Never expose service keys in public repositories
+- **Terms of Service**: Follow the usage terms specified for each API
+
 ## Quick Start
 
-### 1. Service Key Registration
-
-Obtain a service key from the [Korean Public Data Portal](https://www.data.go.kr):
-
-1. Register for an account at data.go.kr
-2. Apply for API access to desired services
-3. Obtain the service key for your application
-
-### 2. Basic Implementation
+### 1. Basic Implementation
 
 ```typescript
 import { KOELSAClient } from "korea-public-sdk";
 
-// Initialize client
+// Initialize client with your service key
 const client = new KOELSAClient("your-service-key");
 
 // Query elevator installation information
 const installations = await client.installation.getInstallationList({
-  siDo: "서울특별시",
-  siGunGu: "강남구",
+  Installation_sdt: "20240101",
+  Installation_edt: "20240131",
   pageNo: 1,
   numOfRows: 10,
 });
 
 // Query elevator inspection results
 const inspections = await client.inspection.getInspectionResults({
-  siDo: "서울특별시",
-  elevatorNo: "EL123456789",
+  elvtrmngno_mngno: "management-code",
   pageNo: 1,
   numOfRows: 10,
 });
 ```
 
-### 3. Convenience Functions
+### 2. Environment Variables
+
+```bash
+# Set service key as environment variable
+export KOELSA_SERVICE_KEY=your-service-key
+```
 
 ```typescript
-import { createKOELSAClient } from "korea-public-sdk";
+// Use environment variable
+const client = new KOELSAClient(process.env.KOELSA_SERVICE_KEY);
+```
 
-const client = createKOELSAClient("your-service-key");
-const result = await client.installation.getInstallationList(params);
+### 3. Error Handling
+
+```typescript
+import { ApiError, ValidationError } from "korea-public-sdk";
+
+try {
+  const result = await client.installation.getInstallationList(params);
+  console.log("Success:", result);
+} catch (error) {
+  if (error instanceof ValidationError) {
+    console.error("Validation error:", error.message);
+  } else if (error instanceof ApiError) {
+    console.error("API error:", error.message, error.statusCode);
+  } else {
+    console.error("Unknown error:", error);
+  }
+}
 ```
 
 ## API Documentation
@@ -110,10 +164,9 @@ const result = await client.installation.getInstallationList(params);
 
 ```typescript
 interface ElevatorInstallationParams {
-  siDo?: string; // Administrative region (optional)
-  siGunGu?: string; // Sub-administrative region (optional)
-  installStartDate?: string; // Installation start date (optional, YYYYMMDD)
-  installEndDate?: string; // Installation end date (optional, YYYYMMDD)
+  Installation_sdt: string; // Start date (YYYYMMDD format, required)
+  Installation_edt: string; // End date (YYYYMMDD format, required)
+  elevator_no?: string; // Elevator number (optional)
   pageNo?: number; // Page number (default: 1)
   numOfRows?: number; // Records per page (default: 10, max: 1000)
 }
@@ -125,13 +178,10 @@ const result = await client.installation.getInstallationList(params);
 
 ```typescript
 interface ElevatorInspectResultParams {
-  siDo?: string; // Administrative region (optional)
-  siGunGu?: string; // Sub-administrative region (optional)
-  elevatorNo?: string; // Elevator number (optional)
-  inspectStartDate?: string; // Inspection start date (optional, YYYYMMDD)
-  inspectEndDate?: string; // Inspection end date (optional, YYYYMMDD)
+  elvtrmngno_mngno: string; // Management code (required)
   pageNo?: number; // Page number (default: 1)
   numOfRows?: number; // Records per page (default: 10, max: 1000)
+  _type?: "xml" | "json"; // Response format (default: xml)
 }
 
 const result = await client.inspection.getInspectionResults(params);
@@ -147,74 +197,71 @@ Korea Public SDK implements a comprehensive error handling system with systemati
 - **2xx**: KOELSA-specific errors
 - **3xx-9xx**: Reserved for future agencies
 
-### Error Handling Implementation
+### Error Types
 
 ```typescript
 import {
   ErrorCodes,
   ValidationError,
+  ApiError,
+  NetworkError,
   ElevatorNotFoundError,
-  getErrorMessage,
-  getErrorCategory,
-  isCommonError,
+  KOELSAServiceError,
 } from "korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
 } catch (error) {
-  // Type-based error handling
-  if (error instanceof ValidationError) {
-    console.error("Validation failed:", error.message);
-  } else if (error instanceof ElevatorNotFoundError) {
-    console.error("Elevator not found:", error.elevatorNo);
-  }
-
-  // Code-based error handling
-  switch (error.code) {
-    case ErrorCodes.INVALID_SERVICE_KEY:
-      console.error("Invalid service key provided");
+  switch (error.constructor) {
+    case ValidationError:
+      console.error("Parameter validation failed:", error.message);
       break;
-    case ErrorCodes.RATE_LIMIT_EXCEEDED:
-      console.error("Rate limit exceeded, please retry later");
+    case ApiError:
+      console.error("API request failed:", error.statusCode, error.message);
       break;
-    case ErrorCodes.ELEVATOR_NOT_FOUND:
-      console.error("Specified elevator not found");
+    case NetworkError:
+      console.error("Network connection failed:", error.message);
       break;
-  }
-
-  // Error categorization
-  if (isCommonError(error.code)) {
-    console.log("Common error:", getErrorMessage(error.code));
-    console.log("Category:", getErrorCategory(error.code));
+    case ElevatorNotFoundError:
+      console.error("Elevator not found:", error.elevatorNo);
+      break;
+    case KOELSAServiceError:
+      console.error("KOELSA service error:", error.serviceEndpoint);
+      break;
   }
 }
 ```
 
-### Error Information Utilities
+## API Status Monitoring
 
-```typescript
-import {
-  getErrorMessage,
-  getErrorCategory,
-  isCommonError,
-  isPlatformError,
-} from "korea-public-sdk";
+Public APIs can change without notice. Simple tests help monitor API status.
 
-// Get human-readable error messages
-const message = getErrorMessage(ErrorCodes.ELEVATOR_NOT_FOUND);
+### Automated Testing
 
-// Categorize errors
-const category = getErrorCategory(error.code);
+GitHub Actions automatically checks API status weekly.
 
-// Check error scope
-if (isCommonError(error.code)) {
-  // Handle common errors affecting all agencies
-} else if (isPlatformError(error.code)) {
-  // Handle agency-specific errors
-}
+```bash
+# Manual API status check
+npm run test:integration
+
+# Unit tests only
+npm run test:unit
 ```
 
-For comprehensive error code documentation, refer to [ERROR_CODES.md](./ERROR_CODES.md).
+### Local Testing Setup
+
+```bash
+# Set environment variable
+export KOELSA_SERVICE_KEY=your-service-key
+
+# Run API tests
+npm run test:integration
+```
+
+The tests verify:
+- API calls execute successfully
+- Basic response structure (`resultCode`, `resultMsg`) is maintained
+- SDK error handling works correctly
 
 ## Configuration
 
@@ -232,11 +279,17 @@ const client = new KOELSAClient("your-service-key", {
 });
 ```
 
-### Environment Variables
+### Health Check
 
-```bash
-# Optional: Set service key as environment variable
-export KOREA_PUBLIC_API_KEY=your-service-key
+```typescript
+// Check if KOELSA API is accessible
+const isHealthy = await client.healthCheck();
+console.log("Service status:", isHealthy);
+
+// Get client information
+const info = client.getClientInfo();
+console.log("Provider:", info.provider.name);
+console.log("Available services:", info.services);
 ```
 
 ## Development
@@ -255,7 +308,9 @@ npm test
 
 ```bash
 npm run build          # Compile TypeScript
-npm run test           # Run test suite
+npm run test           # Run all tests
+npm run test:unit      # Run unit tests only
+npm run test:integration # Run integration tests
 npm run test:coverage  # Run tests with coverage
 npm run lint           # Run ESLint
 npm run format         # Format code with Prettier
@@ -263,16 +318,12 @@ npm run format         # Format code with Prettier
 
 ### Testing
 
-The SDK includes comprehensive test coverage:
-
 ```bash
 # Run all tests
 npm test
 
-# Run specific test categories
-npm test tests/errors/
-npm test tests/utils/
-npm test tests/clients/
+# Run integration tests (requires service key)
+KOELSA_SERVICE_KEY=your-key npm run test:integration
 ```
 
 ## Future Roadmap

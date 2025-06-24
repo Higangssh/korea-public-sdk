@@ -11,6 +11,13 @@ import {
   ElevatorInstallationResponse,
   ElevatorInstallationInfo,
 } from "../types";
+import { 
+  ApiError, 
+  ValidationError,
+  ElevatorNotFoundError,
+  KOELSAServiceError 
+} from "../../../errors";
+import { ErrorCodes } from "../../../errors/base";
 
 /**
  * Elevator installation information service
@@ -37,12 +44,39 @@ export class ElevatorInstallationService implements BaseService {
       params
     );
 
-    // 응답 검증
-    if (response.data.resultCode !== "00") {
-      throw new Error(`API 오류: ${response.data.resultMsg}`);
+    // 응답 검증 및 적절한 에러 처리
+    const resultCode = response.data.response?.header?.resultCode;
+    const resultMsg = response.data.response?.header?.resultMsg;
+    
+    if (resultCode !== "00") {
+      // API 응답 코드에 따른 구체적인 에러 처리
+      if (resultCode === "03") {
+        throw new KOELSAServiceError(
+          `KOELSA 서비스 오류: ${resultMsg}`,
+          "/openapi/service/ElevatorInstallationService/getInstallationElvtrListV2"
+        );
+      } else if (resultCode === "04") {
+        throw new ElevatorNotFoundError(
+          `승강기 설치 정보를 찾을 수 없습니다: ${resultMsg}`
+        );
+      } else {
+        throw new ApiError(
+          `API 요청 실패: ${resultMsg}`,
+          200,
+          resultCode,
+          response.data,
+          ErrorCodes.API_RESPONSE_ERROR
+        );
+      }
     }
 
-    return response.data.items || [];
+    const items = response.data.response?.body?.items;
+    // 실제 데이터는 items.item 배열에 있음
+    if (items && typeof items === 'object' && Array.isArray(items.item)) {
+      return items.item;
+    }
+    // 데이터가 없으면 빈 배열
+    return [];
   }
 
   /**
@@ -62,9 +96,30 @@ export class ElevatorInstallationService implements BaseService {
       params
     );
 
-    // 응답 검증
-    if (response.data.resultCode !== "00") {
-      throw new Error(`API 오류: ${response.data.resultMsg}`);
+    // 응답 검증 및 적절한 에러 처리
+    const resultCode = response.data.response?.header?.resultCode;
+    const resultMsg = response.data.response?.header?.resultMsg;
+    
+    if (resultCode !== "00") {
+      // API 응답 코드에 따른 구체적인 에러 처리
+      if (resultCode === "03") {
+        throw new KOELSAServiceError(
+          `KOELSA 서비스 오류: ${resultMsg}`,
+          "/openapi/service/ElevatorInstallationService/getInstallationElvtrListV2"
+        );
+      } else if (resultCode === "04") {
+        throw new ElevatorNotFoundError(
+          `승강기 설치 정보를 찾을 수 없습니다: ${resultMsg}`
+        );
+      } else {
+        throw new ApiError(
+          `API 요청 실패: ${resultMsg}`,
+          200,
+          resultCode,
+          response.data,
+          ErrorCodes.API_RESPONSE_ERROR
+        );
+      }
     }
 
     return response.data;
@@ -109,8 +164,12 @@ export class ElevatorInstallationService implements BaseService {
     }
 
     // 시작일이 종료일보다 늦지 않은지 확인
-    if (params.Installation_sdt > params.Installation_edt) {
-      throw new Error("시작일이 종료일보다 늦을 수 없습니다.");
+    if (params.Installation_sdt && params.Installation_edt && params.Installation_sdt > params.Installation_edt) {
+      throw new ValidationError(
+        "시작일이 종료일보다 늦을 수 없습니다.",
+        "Installation_sdt",
+        ErrorCodes.INVALID_DATE_FORMAT
+      );
     }
   }
 }

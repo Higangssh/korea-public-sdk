@@ -14,9 +14,11 @@ Korea Public SDK는 한국 정부기관 API에 대한 포괄적이고 타입 안
 - [특징](#특징)
 - [지원 기관](#지원-기관)
 - [설치](#설치)
+- [서비스 키 설정](#서비스-키-설정)
 - [빠른 시작](#빠른-시작)
 - [API 문서](#api-문서)
 - [오류 처리](#오류-처리)
+- [API 상태 모니터링](#api-상태-모니터링)
 - [설정](#설정)
 - [개발](#개발)
 - [기여하기](#기여하기)
@@ -58,48 +60,100 @@ npm install korea-public-sdk
 - Node.js 16.0 이상
 - TypeScript 5.0 이상 (TypeScript 프로젝트의 경우)
 
+## 서비스 키 설정
+
+이 SDK를 사용하려면 공공데이터포털에서 서비스 키를 발급받아야 합니다.
+
+### 1단계: 계정 등록
+
+1. [공공데이터포털](https://www.data.go.kr) 방문
+2. 무료 계정 생성
+3. 본인인증 완료
+
+### 2단계: API 신청
+
+1. 사용하고자 하는 API 검색:
+   - "승강기 설치정보" 검색 → 승강기 설치정보 서비스
+   - "승강기 검사신청결과" 검색 → 승강기 검사신청결과 서비스
+2. 각 API에 대해 "활용신청" 클릭
+3. 신청서 작성:
+   - 활용목적
+   - 사용기간
+   - 예상 트래픽량
+
+### 3단계: 승인 과정
+
+- 신청 후 1-2일 이내 승인 (영업일 기준)
+- 승인 상태는 이메일로 통지
+- 일부 API는 추가 서류가 필요할 수 있음
+
+### 4단계: 서비스 키 확인
+
+1. "마이페이지" → "개발계정" 이동
+2. 승인된 API 목록에서 서비스 키 복사
+3. 각 API별로 고유한 서비스 키 발급
+
+### 사용 제한사항
+
+- **호출 한도**: 대부분의 API는 일일 호출 한도가 있음 (보통 1,000-10,000회)
+- **키 보안**: 공개 저장소에 서비스 키를 노출하지 말 것
+- **이용약관**: 각 API별로 명시된 이용약관 준수
+
 ## 빠른 시작
 
-### 1. 서비스 키 등록
-
-[공공데이터포털](https://www.data.go.kr)에서 서비스 키를 발급받으세요:
-
-1. data.go.kr에서 계정을 등록하세요
-2. 원하는 서비스에 대한 API 접근을 신청하세요
-3. 애플리케이션용 서비스 키를 발급받으세요
-
-### 2. 기본 구현
+### 1. 기본 구현
 
 ```typescript
 import { KOELSAClient } from "korea-public-sdk";
 
-// 클라이언트 초기화
+// 서비스 키로 클라이언트 초기화
 const client = new KOELSAClient("your-service-key");
 
 // 승강기 설치정보 조회
 const installations = await client.installation.getInstallationList({
-  siDo: "서울특별시",
-  siGunGu: "강남구",
+  Installation_sdt: "20240101",
+  Installation_edt: "20240131",
   pageNo: 1,
   numOfRows: 10,
 });
 
 // 승강기 검사결과 조회
 const inspections = await client.inspection.getInspectionResults({
-  siDo: "서울특별시",
-  elevatorNo: "EL123456789",
+  elvtrmngno_mngno: "관리코드",
   pageNo: 1,
   numOfRows: 10,
 });
 ```
 
-### 3. 편의 함수
+### 2. 환경 변수 사용
+
+```bash
+# 서비스 키를 환경 변수로 설정
+export KOELSA_SERVICE_KEY=your-service-key
+```
 
 ```typescript
-import { createKOELSAClient } from "korea-public-sdk";
+// 환경 변수 사용
+const client = new KOELSAClient(process.env.KOELSA_SERVICE_KEY);
+```
 
-const client = createKOELSAClient("your-service-key");
-const result = await client.installation.getInstallationList(params);
+### 3. 오류 처리
+
+```typescript
+import { ApiError, ValidationError } from "korea-public-sdk";
+
+try {
+  const result = await client.installation.getInstallationList(params);
+  console.log("성공:", result);
+} catch (error) {
+  if (error instanceof ValidationError) {
+    console.error("검증 오류:", error.message);
+  } else if (error instanceof ApiError) {
+    console.error("API 요청 실패:", error.statusCode, error.message);
+  } else {
+    console.error("알 수 없는 오류:", error);
+  }
+}
 ```
 
 ## API 문서
@@ -110,10 +164,9 @@ const result = await client.installation.getInstallationList(params);
 
 ```typescript
 interface ElevatorInstallationParams {
-  siDo?: string; // 시도명 (선택사항)
-  siGunGu?: string; // 시군구명 (선택사항)
-  installStartDate?: string; // 설치시작일 (선택사항, YYYYMMDD)
-  installEndDate?: string; // 설치종료일 (선택사항, YYYYMMDD)
+  Installation_sdt: string; // 시작일 (YYYYMMDD 형식, 필수)
+  Installation_edt: string; // 종료일 (YYYYMMDD 형식, 필수)
+  elevator_no?: string; // 승강기번호 (선택사항)
   pageNo?: number; // 페이지 번호 (기본값: 1)
   numOfRows?: number; // 페이지당 건수 (기본값: 10, 최대: 1000)
 }
@@ -125,13 +178,10 @@ const result = await client.installation.getInstallationList(params);
 
 ```typescript
 interface ElevatorInspectResultParams {
-  siDo?: string; // 시도명 (선택사항)
-  siGunGu?: string; // 시군구명 (선택사항)
-  elevatorNo?: string; // 승강기번호 (선택사항)
-  inspectStartDate?: string; // 검사시작일 (선택사항, YYYYMMDD)
-  inspectEndDate?: string; // 검사종료일 (선택사항, YYYYMMDD)
+  elvtrmngno_mngno: string; // 관리코드 (필수)
   pageNo?: number; // 페이지 번호 (기본값: 1)
   numOfRows?: number; // 페이지당 건수 (기본값: 10, 최대: 1000)
+  _type?: "xml" | "json"; // 응답 형식 (기본값: xml)
 }
 
 const result = await client.inspection.getInspectionResults(params);
@@ -147,74 +197,71 @@ Korea Public SDK는 체계적인 오류 분류를 통한 포괄적인 오류 처
 - **2xx**: KOELSA 전용 오류
 - **3xx-9xx**: 향후 기관을 위해 예약됨
 
-### 오류 처리 구현
+### 오류 타입
 
 ```typescript
 import {
   ErrorCodes,
   ValidationError,
+  ApiError,
+  NetworkError,
   ElevatorNotFoundError,
-  getErrorMessage,
-  getErrorCategory,
-  isCommonError,
+  KOELSAServiceError,
 } from "korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
 } catch (error) {
-  // 타입 기반 오류 처리
-  if (error instanceof ValidationError) {
-    console.error("검증 실패:", error.message);
-  } else if (error instanceof ElevatorNotFoundError) {
-    console.error("승강기를 찾을 수 없음:", error.elevatorNo);
-  }
-
-  // 코드 기반 오류 처리
-  switch (error.code) {
-    case ErrorCodes.INVALID_SERVICE_KEY:
-      console.error("잘못된 서비스 키가 제공됨");
+  switch (error.constructor) {
+    case ValidationError:
+      console.error("매개변수 검증 실패:", error.message);
       break;
-    case ErrorCodes.RATE_LIMIT_EXCEEDED:
-      console.error("요청 한도 초과, 나중에 다시 시도하세요");
+    case ApiError:
+      console.error("API 요청 실패:", error.statusCode, error.message);
       break;
-    case ErrorCodes.ELEVATOR_NOT_FOUND:
-      console.error("지정된 승강기를 찾을 수 없음");
+    case NetworkError:
+      console.error("네트워크 연결 실패:", error.message);
       break;
-  }
-
-  // 오류 분류
-  if (isCommonError(error.code)) {
-    console.log("공통 오류:", getErrorMessage(error.code));
-    console.log("카테고리:", getErrorCategory(error.code));
+    case ElevatorNotFoundError:
+      console.error("승강기를 찾을 수 없음:", error.elevatorNo);
+      break;
+    case KOELSAServiceError:
+      console.error("KOELSA 서비스 오류:", error.serviceEndpoint);
+      break;
   }
 }
 ```
 
-### 오류 정보 유틸리티
+## API 상태 모니터링
 
-```typescript
-import {
-  getErrorMessage,
-  getErrorCategory,
-  isCommonError,
-  isPlatformError,
-} from "korea-public-sdk";
+공공 API는 예고 없이 변경될 수 있습니다. 간단한 테스트를 통해 API 상태를 확인할 수 있습니다.
 
-// 사람이 읽을 수 있는 오류 메시지 가져오기
-const message = getErrorMessage(ErrorCodes.ELEVATOR_NOT_FOUND);
+### 자동 테스트
 
-// 오류 분류
-const category = getErrorCategory(error.code);
+GitHub Actions를 통해 주간 단위로 API 상태를 자동 확인합니다.
 
-// 오류 범위 확인
-if (isCommonError(error.code)) {
-  // 모든 기관에 영향을 주는 공통 오류 처리
-} else if (isPlatformError(error.code)) {
-  // 기관별 특화 오류 처리
-}
+```bash
+# 수동 API 상태 확인
+npm run test:integration
+
+# 유닛 테스트만 실행
+npm run test:unit
 ```
 
-포괄적인 오류 코드 문서는 [ERROR_CODES.md](./ERROR_CODES.md)를 참조하세요.
+### 로컬 테스트 설정
+
+```bash
+# 환경 변수 설정
+export KOELSA_SERVICE_KEY=your-service-key
+
+# API 테스트 실행
+npm run test:integration
+```
+
+테스트는 다음 항목들을 확인합니다:
+- API 호출이 정상적으로 작동하는지
+- 기본 응답 구조(`resultCode`, `resultMsg`)가 유지되는지
+- SDK의 오류 처리가 올바르게 작동하는지
 
 ## 설정
 
@@ -232,11 +279,17 @@ const client = new KOELSAClient("your-service-key", {
 });
 ```
 
-### 환경 변수
+### 상태 확인
 
-```bash
-# 선택사항: 서비스 키를 환경 변수로 설정
-export KOREA_PUBLIC_API_KEY=your-service-key
+```typescript
+// KOELSA API 접근 가능 여부 확인
+const isHealthy = await client.healthCheck();
+console.log("서비스 상태:", isHealthy);
+
+// 클라이언트 정보 확인
+const info = client.getClientInfo();
+console.log("제공자:", info.provider.name);
+console.log("사용 가능한 서비스:", info.services);
 ```
 
 ## 개발
@@ -255,7 +308,9 @@ npm test
 
 ```bash
 npm run build          # TypeScript 컴파일
-npm run test           # 테스트 스위트 실행
+npm run test           # 모든 테스트 실행
+npm run test:unit      # 유닛 테스트만 실행
+npm run test:integration # 통합 테스트 실행
 npm run test:coverage  # 커버리지와 함께 테스트 실행
 npm run lint           # ESLint 실행
 npm run format         # Prettier로 코드 포맷팅
@@ -263,16 +318,12 @@ npm run format         # Prettier로 코드 포맷팅
 
 ### 테스트
 
-SDK는 포괄적인 테스트 커버리지를 포함합니다:
-
 ```bash
 # 모든 테스트 실행
 npm test
 
-# 특정 테스트 카테고리 실행
-npm test tests/errors/
-npm test tests/utils/
-npm test tests/clients/
+# 통합 테스트 실행 (서비스 키 필요)
+KOELSA_SERVICE_KEY=your-key npm run test:integration
 ```
 
 ## 향후 로드맵

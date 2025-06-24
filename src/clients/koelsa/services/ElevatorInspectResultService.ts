@@ -6,6 +6,14 @@ import {
   ElevatorInspectResultResponse,
   ElevatorInspectResultInfo,
 } from "../types";
+import { 
+  ApiError, 
+  ValidationError,
+  ElevatorNotFoundError,
+  KOELSAServiceError,
+  InvalidManagementCodeError 
+} from "../../../errors";
+import { ErrorCodes } from "../../../errors/base";
 
 /**
  * 승강기 검사신청결과 서비스
@@ -32,12 +40,39 @@ export class ElevatorInspectResultService implements BaseService {
       params
     );
 
-    // 응답 검증
-    if (response.data.resultCode !== "00") {
-      throw new Error(`API 오류: ${response.data.resultMsg}`);
+    // 응답 검증 및 적절한 에러 처리
+    const resultCode = response.data.response?.header?.resultCode;
+    const resultMsg = response.data.response?.header?.resultMsg;
+    
+    if (resultCode !== "00") {
+      // API 응답 코드에 따른 구체적인 에러 처리
+      if (resultCode === "03") {
+        throw new KOELSAServiceError(
+          `KOELSA 서비스 오류: ${resultMsg}`,
+          "/openapi/service/ElevatorInspectResultService/getInspectResultListV1"
+        );
+      } else if (resultCode === "04") {
+        throw new ElevatorNotFoundError(
+          `검사 결과를 찾을 수 없습니다: ${resultMsg}`
+        );
+      } else {
+        throw new ApiError(
+          `API 요청 실패: ${resultMsg}`,
+          200,
+          resultCode,
+          response.data,
+          ErrorCodes.API_RESPONSE_ERROR
+        );
+      }
     }
 
-    return response.data.items || [];
+    const items = response.data.response?.body?.items;
+    // 실제 데이터는 items.item 배열에 있음
+    if (items && typeof items === 'object' && Array.isArray(items.item)) {
+      return items.item;
+    }
+    // 데이터가 없으면 빈 배열
+    return [];
   }
 
   /**
@@ -57,9 +92,30 @@ export class ElevatorInspectResultService implements BaseService {
       params
     );
 
-    // 응답 검증
-    if (response.data.resultCode !== "00") {
-      throw new Error(`API 오류: ${response.data.resultMsg}`);
+    // 응답 검증 및 적절한 에러 처리
+    const resultCode = response.data.response?.header?.resultCode;
+    const resultMsg = response.data.response?.header?.resultMsg;
+    
+    if (resultCode !== "00") {
+      // API 응답 코드에 따른 구체적인 에러 처리
+      if (resultCode === "03") {
+        throw new KOELSAServiceError(
+          `KOELSA 서비스 오류: ${resultMsg}`,
+          "/openapi/service/ElevatorInspectResultService/getInspectResultListV1"
+        );
+      } else if (resultCode === "04") {
+        throw new ElevatorNotFoundError(
+          `검사 결과를 찾을 수 없습니다: ${resultMsg}`
+        );
+      } else {
+        throw new ApiError(
+          `API 요청 실패: ${resultMsg}`,
+          200,
+          resultCode,
+          response.data,
+          ErrorCodes.API_RESPONSE_ERROR
+        );
+      }
     }
 
     return response.data;
@@ -87,6 +143,17 @@ export class ElevatorInspectResultService implements BaseService {
   }
 
   /**
+   * 
+   * @param params 조회 파라미터
+   * @returns 검사신청결과 목록
+   */
+  async getInspectionResults(
+    params: ElevatorInspectResultParams
+  ): Promise<ElevatorInspectResultInfo[]> {
+    return this.getInspectResultList(params);
+  }
+
+  /**
    * 파라미터 유효성 검사
    */
   private validateParams(params: ElevatorInspectResultParams): void {
@@ -94,11 +161,18 @@ export class ElevatorInspectResultService implements BaseService {
     validateNumOfRows(params.numOfRows);
 
     if (!params.elvtrmngno_mngno || params.elvtrmngno_mngno.trim() === "") {
-      throw new Error("현장관리코드 또는 승강기관리코드가 필요합니다.");
+      throw new ValidationError(
+        "현장관리코드 또는 승강기관리코드가 필요합니다.",
+        "elvtrmngno_mngno",
+        ErrorCodes.MISSING_REQUIRED_FIELD
+      );
     }
 
     if (params.elvtrmngno_mngno.length > 100) {
-      throw new Error("관리코드는 최대 100자까지 입력 가능합니다.");
+      throw new InvalidManagementCodeError(
+        "관리코드는 최대 100자까지 입력 가능합니다.",
+        params.elvtrmngno_mngno
+      );
     }
   }
 }

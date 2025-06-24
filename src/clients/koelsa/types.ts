@@ -136,13 +136,36 @@ export interface ElevatorInstallationInfo {
 }
 
 /**
- * 승강기 설치정보 응답
+ * 표준 공공데이터 API 응답 헤더
  */
-export interface ElevatorInstallationResponse extends PaginationInfo {
+export interface ApiResponseHeader {
   resultCode: string;
   resultMsg: string;
-  items: ElevatorInstallationInfo[];
 }
+
+/**
+ * 표준 공공데이터 API 응답 바디
+ */
+export interface ApiResponseBody<T> extends PaginationInfo {
+  items: {
+    item: T[];
+  } | string; // 데이터가 없을 때는 빈 문자열
+}
+
+/**
+ * 표준 공공데이터 API 응답 구조
+ */
+export interface StandardApiResponse<T> {
+  response: {
+    header: ApiResponseHeader;
+    body: ApiResponseBody<T>;
+  };
+}
+
+/**
+ * 승강기 설치정보 응답
+ */
+export interface ElevatorInstallationResponse extends StandardApiResponse<ElevatorInstallationInfo> {}
 
 /**
  * 승강기 검사신청결과 조회 요청 파라미터
@@ -392,8 +415,4 @@ export interface ElevatorInspectResultInfo {
 /**
  * 승강기 검사신청결과 응답
  */
-export interface ElevatorInspectResultResponse extends PaginationInfo {
-  resultCode: string;
-  resultMsg: string;
-  items: ElevatorInspectResultInfo[];
-}
+export interface ElevatorInspectResultResponse extends StandardApiResponse<ElevatorInspectResultInfo> {}
