@@ -38,16 +38,17 @@ Korea Public SDK는 한국 정부기관 API에 대한 포괄적이고 타입 안
 
 ### 현재 지원 중
 
-| 기관                        | 클라이언트     | 설명                       | API 수 |
-| --------------------------- | -------------- | -------------------------- | ------ |
-| 한국승강기안전공단 (KOELSA) | `KOELSAClient` | 승강기 설치 및 검사 데이터 | 2      |
+| 기관                        | 클라이언트     | 설명                       | 메서드 수 |
+| --------------------------- | -------------- | -------------------------- | --------- |
+| 한국승강기안전공단 (KOELSA) | `KOELSAClient` | 승강기 설치 및 검사 데이터 | 9         |
 
 ### 지원 API
 
 **KOELSA (한국승강기안전공단)**
 
-- **승강기 설치정보**: 지역별 및 기간별 승강기 설치 데이터
-- **승강기 검사결과**: 안전 검사 결과 및 유지보수 이력
+- **승강기 설치정보**: 지역별 및 기간별 승강기 설치 데이터 (3개 메서드)
+- **승강기 검사결과**: 안전 검사 결과 및 유지보수 이력 (4개 메서드, 유효한 관리코드 필요)
+- **상태 확인 및 클라이언트 정보**: 서비스 상태 및 클라이언트 정보 (2개 메서드)
 
 ## 설치
 
@@ -117,9 +118,9 @@ const installations = await client.installation.getInstallationList({
   numOfRows: 10,
 });
 
-// 승강기 검사결과 조회
-const inspections = await client.inspection.getInspectionResults({
-  elvtrmngno_mngno: "관리코드",
+// 승강기 검사결과 조회 (유효한 관리코드 필요)
+const inspections = await client.inspection.getInspectResultList({
+  elvtrmngno_mngno: "유효한-관리코드",
   pageNo: 1,
   numOfRows: 10,
 });
@@ -178,13 +179,16 @@ const result = await client.installation.getInstallationList(params);
 
 ```typescript
 interface ElevatorInspectResultParams {
-  elvtrmngno_mngno: string; // 관리코드 (필수)
+  elvtrmngno_mngno: string; // 관리코드 (필수 - 유효한 현장관리코드 또는 승강기관리코드)
   pageNo?: number; // 페이지 번호 (기본값: 1)
   numOfRows?: number; // 페이지당 건수 (기본값: 10, 최대: 1000)
   _type?: "xml" | "json"; // 응답 형식 (기본값: xml)
 }
 
-const result = await client.inspection.getInspectionResults(params);
+// 사용 가능한 메서드:
+const result = await client.inspection.getInspectResultList(params);
+const resultWithPaging = await client.inspection.getInspectResultListWithPagination(params);
+const resultByCode = await client.inspection.getInspectResultByCode("관리코드");
 ```
 
 ## 오류 처리
@@ -259,9 +263,10 @@ npm run test:integration
 ```
 
 테스트는 다음 항목들을 확인합니다:
-- API 호출이 정상적으로 작동하는지
-- 기본 응답 구조(`resultCode`, `resultMsg`)가 유지되는지
+- 실제 데이터와 함께 API 호출이 정상적으로 작동하는지
+- 표준 공공데이터 API 응답 구조(`response.header.resultCode`, `response.body`)가 유지되는지
 - SDK의 오류 처리가 올바르게 작동하는지
+- 실제 API 응답을 통한 TypeScript 타입 안전성
 
 ## 설정
 

@@ -38,16 +38,17 @@ Korea Public SDK provides a comprehensive, type-safe interface for accessing Kor
 
 ### Currently Available
 
-| Agency                                | Client         | Description                               | APIs |
-| ------------------------------------- | -------------- | ----------------------------------------- | ---- |
-| Korea Elevator Safety Agency (KOELSA) | `KOELSAClient` | Elevator installation and inspection data | 2    |
+| Agency                                | Client         | Description                               | Methods |
+| ------------------------------------- | -------------- | ----------------------------------------- | ------- |
+| Korea Elevator Safety Agency (KOELSA) | `KOELSAClient` | Elevator installation and inspection data | 9       |
 
 ### Available APIs
 
 **KOELSA (Korea Elevator Safety Agency)**
 
-- **Elevator Installation Information**: Regional and temporal elevator installation data
-- **Elevator Inspection Results**: Safety inspection results and maintenance history
+- **Elevator Installation Information**: Regional and temporal elevator installation data (3 methods)
+- **Elevator Inspection Results**: Safety inspection results and maintenance history (4 methods, requires valid management codes)
+- **Health Check & Client Info**: Service status and client information (2 methods)
 
 ## Installation
 
@@ -117,9 +118,9 @@ const installations = await client.installation.getInstallationList({
   numOfRows: 10,
 });
 
-// Query elevator inspection results
-const inspections = await client.inspection.getInspectionResults({
-  elvtrmngno_mngno: "management-code",
+// Query elevator inspection results (requires valid management code)
+const inspections = await client.inspection.getInspectResultList({
+  elvtrmngno_mngno: "valid-management-code",
   pageNo: 1,
   numOfRows: 10,
 });
@@ -178,13 +179,16 @@ const result = await client.installation.getInstallationList(params);
 
 ```typescript
 interface ElevatorInspectResultParams {
-  elvtrmngno_mngno: string; // Management code (required)
+  elvtrmngno_mngno: string; // Management code (required - must be valid site or elevator management code)
   pageNo?: number; // Page number (default: 1)
   numOfRows?: number; // Records per page (default: 10, max: 1000)
   _type?: "xml" | "json"; // Response format (default: xml)
 }
 
-const result = await client.inspection.getInspectionResults(params);
+// Available methods:
+const result = await client.inspection.getInspectResultList(params);
+const resultWithPaging = await client.inspection.getInspectResultListWithPagination(params);
+const resultByCode = await client.inspection.getInspectResultByCode("management-code");
 ```
 
 ## Error Handling
@@ -259,9 +263,10 @@ npm run test:integration
 ```
 
 The tests verify:
-- API calls execute successfully
-- Basic response structure (`resultCode`, `resultMsg`) is maintained
+- API calls execute successfully with real data
+- Standard public data API response structure (`response.header.resultCode`, `response.body`) is maintained
 - SDK error handling works correctly
+- TypeScript type safety with actual API responses
 
 ## Configuration
 
