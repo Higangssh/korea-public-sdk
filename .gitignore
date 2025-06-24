@@ -53,3 +53,5 @@ pids
 # Temporary folders
 tmp/
 temp/
+
+browser-support.md

@@ -91,7 +91,7 @@ const inspections = await client.inspectResult.getInspectResultList({
 
 ## Error Handling
 
-The SDK provides detailed error information for robust error handling:
+The SDK provides detailed error information with **platform-specific numerical error codes** for robust error handling:
 
 ```typescript
 import {
@@ -99,26 +99,98 @@ import {
   ApiError,
   NetworkError,
   ElevatorNotFoundError,
+  WeatherStationNotFoundError,
+  VehicleNotFoundError,
+  ErrorCodes,
+  getErrorMessage,
+  getErrorCategory,
+  isCommonError,
+  isPlatformError,
 } from "korea-public-sdk";
 
 try {
   await client.installation.getInstallationList(params);
 } catch (error) {
+  // Handle by error code
+  switch (error.code) {
+    case ErrorCodes.ELEVATOR_NOT_FOUND:
+      console.log(`Elevator ${error.elevatorNo} not found`);
+      break;
+    case ErrorCodes.RATE_LIMIT_EXCEEDED:
+      console.log("Rate limit exceeded. Please retry later.");
+      break;
+    case ErrorCodes.INVALID_DATE_FORMAT:
+      console.log("Invalid date format. Use YYYYMMDD format.");
+      break;
+    default:
+      console.log(`Error ${error.code}: ${getErrorMessage(error.code)}`);
+  }
+
+  // Handle by category
+  const category = getErrorCategory(error.code);
+  console.log(`Error category: ${category}`);
+
+  // Check if common error (affects all platforms)
+  if (isCommonError(error.code)) {
+    console.log("This is a common error that can occur on any platform");
+  }
+
+  // Check if platform-specific error
+  if (isPlatformError(error.code)) {
+    console.log("This is a platform-specific error");
+  }
+
+  // Handle by platform-specific error type
+  if (error instanceof ElevatorNotFoundError) {
+    console.log(`KOELSA: Elevator ${error.elevatorNo} not found`);
+  } else if (error instanceof WeatherStationNotFoundError) {
+    console.log(`KMA: Weather station ${error.stationId} not found`);
+  } else if (error instanceof VehicleNotFoundError) {
+    console.log(`KOTSA: Vehicle ${error.vehicleNumber} not found`);
+  }
+
+  // Handle by error type (legacy support)
   if (error instanceof ValidationError) {
-    // Handle validation errors
     console.log(`Validation failed for field: ${error.field}`);
-  } else if (error instanceof ElevatorNotFoundError) {
-    // Handle elevator-specific errors
-    console.log(`Elevator ${error.elevatorNo} not found`);
   } else if (error instanceof ApiError) {
-    // Handle API errors
     console.log(`API error ${error.statusCode}: ${error.message}`);
   } else if (error instanceof NetworkError) {
-    // Handle network errors
     console.log("Network error:", error.originalError);
   }
 }
 ```
+
+### Error Code Reference
+
+For a complete list of error codes and their descriptions, see the [Error Codes Reference](ERROR_CODES.md).
+
+**New Error Code System (Platform-Based):**
+
+- **1xx**: Common errors (validation, API, network, configuration, service, rate limiting)
+- **2xx**: KOELSA (Korea Elevator Safety Agency) specific errors
+- **3xx**: KMA (Korea Meteorological Administration) specific errors (future)
+- **4xx**: KOTSA (Korea Transportation Safety Authority) specific errors (future)
+- **5xx-9xx**: Reserved for future agencies
+
+**Error Organization:**
+
+```
+src/errors/
+├── base.ts       # Base error class and ErrorCodes enum
+├── common.ts     # Common errors (1xx range)
+├── koelsa.ts     # KOELSA specific errors (2xx range)
+├── kma.ts        # KMA specific errors (3xx range)
+├── kotsa.ts      # KOTSA specific errors (4xx range)
+└── index.ts      # Centralized exports
+```
+
+**Key Benefits:**
+
+- **Platform Isolation**: Each agency gets 99 dedicated error codes (e.g., KOELSA: 200-299)
+- **Scalability**: Easy to add new agencies without conflicts
+- **Categorization**: Quickly identify error source by first digit
+- **Type Safety**: Full TypeScript enum support with helper functions
+- **Organized Structure**: Platform-specific errors grouped in dedicated files
 
 ## Configuration
 

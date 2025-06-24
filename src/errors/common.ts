@@ -1,4 +1,4 @@
-import { KoreaPublicSDKError } from "./base";
+import { KoreaPublicSDKError, ErrorCodes } from "./base";
 
 /**
  * Error thrown when validation fails
@@ -6,8 +6,12 @@ import { KoreaPublicSDKError } from "./base";
 export class ValidationError extends KoreaPublicSDKError {
   public readonly field?: string;
 
-  constructor(message: string, field?: string) {
-    super(message, "VALIDATION_ERROR");
+  constructor(
+    message: string,
+    field?: string,
+    code: ErrorCodes = ErrorCodes.VALIDATION_ERROR
+  ) {
+    super(message, code);
     if (field !== undefined) {
       this.field = field;
     }
@@ -34,9 +38,10 @@ export class ApiError extends KoreaPublicSDKError {
     message: string,
     statusCode?: number,
     apiCode?: string,
-    response?: any
+    response?: any,
+    code: ErrorCodes = ErrorCodes.API_ERROR
   ) {
-    super(message, "API_ERROR");
+    super(message, code);
     if (statusCode !== undefined) {
       this.statusCode = statusCode;
     }
@@ -70,8 +75,12 @@ export class ApiError extends KoreaPublicSDKError {
 export class NetworkError extends KoreaPublicSDKError {
   public readonly originalError?: Error;
 
-  constructor(message: string, originalError?: Error) {
-    super(message, "NETWORK_ERROR");
+  constructor(
+    message: string,
+    originalError?: Error,
+    code: ErrorCodes = ErrorCodes.NETWORK_ERROR
+  ) {
+    super(message, code);
     if (originalError !== undefined) {
       this.originalError = originalError;
     }
@@ -93,8 +102,12 @@ export class NetworkError extends KoreaPublicSDKError {
 export class ConfigurationError extends KoreaPublicSDKError {
   public readonly configField?: string;
 
-  constructor(message: string, configField?: string) {
-    super(message, "CONFIGURATION_ERROR");
+  constructor(
+    message: string,
+    configField?: string,
+    code: ErrorCodes = ErrorCodes.CONFIGURATION_ERROR
+  ) {
+    super(message, code);
     if (configField !== undefined) {
       this.configField = configField;
     }
@@ -116,8 +129,12 @@ export class ConfigurationError extends KoreaPublicSDKError {
 export class ServiceUnavailableError extends KoreaPublicSDKError {
   public readonly serviceName?: string;
 
-  constructor(message: string, serviceName?: string) {
-    super(message, "SERVICE_UNAVAILABLE");
+  constructor(
+    message: string,
+    serviceName?: string,
+    code: ErrorCodes = ErrorCodes.SERVICE_UNAVAILABLE
+  ) {
+    super(message, code);
     if (serviceName !== undefined) {
       this.serviceName = serviceName;
     }
@@ -139,8 +156,12 @@ export class ServiceUnavailableError extends KoreaPublicSDKError {
 export class RateLimitError extends KoreaPublicSDKError {
   public readonly retryAfter?: number;
 
-  constructor(message: string, retryAfter?: number) {
-    super(message, "RATE_LIMIT_EXCEEDED");
+  constructor(
+    message: string,
+    retryAfter?: number,
+    code: ErrorCodes = ErrorCodes.RATE_LIMIT_EXCEEDED
+  ) {
+    super(message, code);
     if (retryAfter !== undefined) {
       this.retryAfter = retryAfter;
     }

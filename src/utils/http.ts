@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { ClientConfig, RequestOptions } from "../types/common";
 import { NetworkError, ApiError } from "../errors/common";
+import { ErrorCodes } from "../errors/base";
 
 /**
  * HTTP client utility class for handling API requests
@@ -33,23 +34,46 @@ export class HttpClient {
       (response) => response,
       (error) => {
         if (error.response) {
+          // Determine appropriate error code based on status
+          let errorCode = ErrorCodes.API_ERROR;
+          if (error.response.status === 429) {
+            errorCode = ErrorCodes.RATE_LIMIT_EXCEEDED;
+          } else if (error.response.status >= 500) {
+            errorCode = ErrorCodes.SERVICE_UNAVAILABLE;
+          } else if (
+            error.code === "ECONNABORTED" ||
+            error.code === "TIMEOUT"
+          ) {
+            errorCode = ErrorCodes.API_TIMEOUT;
+          }
+
           throw new ApiError(
             `API request failed: ${error.response.status} - ${
               error.response.data?.resultMsg || error.message
             }`,
             error.response.status,
             error.response.data?.resultCode,
-            error.response.data
+            error.response.data,
+            errorCode
           );
         } else if (error.request) {
+          let errorCode = ErrorCodes.NETWORK_ERROR;
+          if (error.code === "ENOTFOUND") {
+            errorCode = ErrorCodes.DNS_RESOLUTION_FAILED;
+          } else if (error.code === "ECONNREFUSED") {
+            errorCode = ErrorCodes.CONNECTION_FAILED;
+          }
+
           throw new NetworkError(
             "Network error: Unable to connect to server",
-            error
+            error,
+            errorCode
           );
         } else {
           throw new NetworkError(
             `Request configuration error: ${error.message}`,
-            error
+            error,
+            ErrorCodes.CONFIGURATION_ERROR
           );
         }
       }

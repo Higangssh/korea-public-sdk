@@ -1,4 +1,4 @@
-import { KoreaPublicSDKError } from "../../errors/base";
+import { KoreaPublicSDKError, ErrorCodes } from "./base";
 
 /**
  * Error thrown when elevator number is not found
@@ -7,7 +7,7 @@ export class ElevatorNotFoundError extends KoreaPublicSDKError {
   public readonly elevatorNo?: string;
 
   constructor(message: string, elevatorNo?: string) {
-    super(message, "ELEVATOR_NOT_FOUND");
+    super(message, ErrorCodes.ELEVATOR_NOT_FOUND);
     if (elevatorNo !== undefined) {
       this.elevatorNo = elevatorNo;
     }
@@ -22,7 +22,7 @@ export class InvalidInspectionDataError extends KoreaPublicSDKError {
   public readonly dataField?: string;
 
   constructor(message: string, inspectionId?: string, dataField?: string) {
-    super(message, "INVALID_INSPECTION_DATA");
+    super(message, ErrorCodes.INVALID_INSPECTION_DATA);
     if (inspectionId !== undefined) {
       this.inspectionId = inspectionId;
     }
@@ -51,7 +51,7 @@ export class InvalidManagementCodeError extends KoreaPublicSDKError {
   public readonly managementCode?: string;
 
   constructor(message: string, managementCode?: string) {
-    super(message, "INVALID_MANAGEMENT_CODE");
+    super(message, ErrorCodes.INVALID_MANAGEMENT_CODE);
     if (managementCode !== undefined) {
       this.managementCode = managementCode;
     }
@@ -70,7 +70,7 @@ export class KOELSAServiceError extends KoreaPublicSDKError {
     serviceEndpoint?: string,
     maintenanceUntil?: Date
   ) {
-    super(message, "KOELSA_SERVICE_ERROR");
+    super(message, ErrorCodes.KOELSA_SERVICE_ERROR);
     if (serviceEndpoint !== undefined) {
       this.serviceEndpoint = serviceEndpoint;
     }

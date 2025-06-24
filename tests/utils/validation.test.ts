@@ -6,6 +6,7 @@ import {
   validateElevatorNo,
 } from "../../src/utils/validation";
 import { ValidationError } from "../../src/errors/common";
+import { ErrorCodes } from "../../src/errors/base";
 
 describe("Validation Functions", () => {
   describe("validateServiceKey", () => {
@@ -21,12 +22,15 @@ describe("Validation Functions", () => {
       expect(() => validateServiceKey("\t\n ")).toThrow(ValidationError);
     });
 
-    it("should throw ValidationError with correct field name", () => {
+    it("should throw ValidationError with correct field name and error code", () => {
       try {
         validateServiceKey("");
       } catch (error) {
         expect(error).toBeInstanceOf(ValidationError);
         expect((error as ValidationError).field).toBe("serviceKey");
+        expect((error as ValidationError).code).toBe(
+          ErrorCodes.INVALID_SERVICE_KEY
+        );
       }
     });
 
@@ -53,12 +57,15 @@ describe("Validation Functions", () => {
       expect(() => validatePageNo(Infinity)).toThrow(ValidationError);
     });
 
-    it("should throw ValidationError with correct message and field", () => {
+    it("should throw ValidationError with correct message, field, and error code", () => {
       try {
         validatePageNo(0);
       } catch (error) {
         expect(error).toBeInstanceOf(ValidationError);
         expect((error as ValidationError).field).toBe("pageNo");
+        expect((error as ValidationError).code).toBe(
+          ErrorCodes.INVALID_PAGE_NUMBER
+        );
         expect((error as ValidationError).message).toBe(
           "Page number must be an integer greater than or equal to 1."
         );
@@ -88,12 +95,15 @@ describe("Validation Functions", () => {
       expect(() => validateNumOfRows(NaN)).toThrow(ValidationError);
     });
 
-    it("should throw ValidationError with correct message and field", () => {
+    it("should throw ValidationError with correct message, field, and error code", () => {
       try {
         validateNumOfRows(1001);
       } catch (error) {
         expect(error).toBeInstanceOf(ValidationError);
         expect((error as ValidationError).field).toBe("numOfRows");
+        expect((error as ValidationError).code).toBe(
+          ErrorCodes.INVALID_PARAMETER
+        );
         expect((error as ValidationError).message).toBe(
           "Number of rows per page must be an integer between 1 and 1000."
         );
@@ -156,14 +166,36 @@ describe("Validation Functions", () => {
       );
     });
 
-    it("should throw ValidationError with correct field name", () => {
+    it("should throw ValidationError with correct field name and error code", () => {
       try {
         validateDateFormat("invalid", "startDate");
       } catch (error) {
         expect(error).toBeInstanceOf(ValidationError);
         expect((error as ValidationError).field).toBe("startDate");
+        expect((error as ValidationError).code).toBe(
+          ErrorCodes.INVALID_DATE_FORMAT
+        );
         expect((error as ValidationError).message).toContain("startDate");
       }
+    });
+
+    it("should use correct error code for all date validation failures", () => {
+      const testCases = [
+        ["invalid", "testDate"],
+        ["18991231", "testDate"], // year out of range
+        ["20240001", "testDate"], // invalid month
+        ["20240100", "testDate"], // invalid day
+      ];
+
+      testCases.forEach(([date, fieldName]) => {
+        try {
+          validateDateFormat(date, fieldName);
+        } catch (error) {
+          expect((error as ValidationError).code).toBe(
+            ErrorCodes.INVALID_DATE_FORMAT
+          );
+        }
+      });
     });
 
     it("should pass validation with valid dates", () => {
@@ -194,12 +226,15 @@ describe("Validation Functions", () => {
       ); // 13 chars
     });
 
-    it("should throw ValidationError with correct message and field", () => {
+    it("should throw ValidationError with correct message, field, and error code", () => {
       try {
         validateElevatorNo("1234567890123");
       } catch (error) {
         expect(error).toBeInstanceOf(ValidationError);
         expect((error as ValidationError).field).toBe("elevatorNo");
+        expect((error as ValidationError).code).toBe(
+          ErrorCodes.INVALID_ELEVATOR_NUMBER
+        );
         expect((error as ValidationError).message).toBe(
           "Elevator unique number must be 12 characters or less."
         );
@@ -216,6 +251,57 @@ describe("Validation Functions", () => {
     it("should handle undefined and null values safely", () => {
       // Note: TypeScript signature expects string, but we should handle edge cases
       expect(() => validateElevatorNo("")).not.toThrow();
+    });
+  });
+
+  describe("error code consistency across validation functions", () => {
+    it("should use appropriate specific error codes", () => {
+      const testCases = [
+        {
+          fn: () => validateServiceKey(""),
+          expectedCode: ErrorCodes.INVALID_SERVICE_KEY,
+        },
+        {
+          fn: () => validatePageNo(0),
+          expectedCode: ErrorCodes.INVALID_PAGE_NUMBER,
+        },
+        {
+          fn: () => validateNumOfRows(0),
+          expectedCode: ErrorCodes.INVALID_PARAMETER,
+        },
+        {
+          fn: () => validateDateFormat("invalid", "test"),
+          expectedCode: ErrorCodes.INVALID_DATE_FORMAT,
+        },
+        {
+          fn: () => validateElevatorNo("1234567890123"),
+          expectedCode: ErrorCodes.INVALID_ELEVATOR_NUMBER,
+        },
+      ];
+
+      testCases.forEach(({ fn, expectedCode }) => {
+        try {
+          fn();
+          fail("Expected function to throw an error");
+        } catch (error) {
+          expect(error).toBeInstanceOf(ValidationError);
+          expect((error as ValidationError).code).toBe(expectedCode);
+        }
+      });
+    });
+
+    it("should all throw ValidationError instances", () => {
+      const functions = [
+        () => validateServiceKey(""),
+        () => validatePageNo(0),
+        () => validateNumOfRows(0),
+        () => validateDateFormat("invalid", "test"),
+        () => validateElevatorNo("1234567890123"),
+      ];
+
+      functions.forEach((fn) => {
+        expect(fn).toThrow(ValidationError);
+      });
     });
   });
 });

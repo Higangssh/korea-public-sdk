@@ -9,10 +9,17 @@
  * - clients/[agency]/errors.ts: Agency-specific error types
  */
 
-// Base error class
-export { KoreaPublicSDKError } from "./base";
+// Base error and error codes
+export {
+  KoreaPublicSDKError,
+  ErrorCodes,
+  getErrorMessage,
+  getErrorCategory,
+  isCommonError,
+  isPlatformError,
+} from "./base";
 
-// Common error types
+// Common errors
 export {
   ValidationError,
   ApiError,
@@ -28,7 +35,23 @@ export {
   InvalidInspectionDataError,
   InvalidManagementCodeError,
   KOELSAServiceError,
-} from "../clients/koelsa/errors";
+} from "./koelsa";
+
+// KMA specific errors (future)
+export {
+  WeatherStationNotFoundError,
+  WeatherDataNotFoundError,
+  InvalidLocationCodeError,
+  KMAServiceError,
+} from "./kma";
+
+// KOTSA specific errors (future)
+export {
+  VehicleNotFoundError,
+  InvalidVehicleNumberError,
+  TransportDataNotAvailableError,
+  KOTSAServiceError,
+} from "./kotsa";
 
 // Future agency errors can be exported here as they are implemented
 // export { WeatherStationNotFoundError, WeatherDataUnavailableError } from './future-agencies';
