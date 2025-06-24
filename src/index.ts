@@ -16,10 +16,13 @@ export * from "./utils";
 export const SDK_VERSION = "1.0.0";
 
 /**
- * Supported API provider list
+ * Currently supported API providers
  */
 export const SUPPORTED_PROVIDERS = {
-  KOELSA: "Korea Elevator Safety Agency",
+  KOELSA: "Korea Elevator Safety Agency (한국승강기안전공단)",
+  // 향후 추가 예정:
+  // KMA: "Korea Meteorological Administration (기상청)",
+  // KOTSA: "Korea Transportation Safety Authority (교통안전공단)",
 } as const;
 
 /**

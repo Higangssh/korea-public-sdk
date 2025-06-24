@@ -4,9 +4,7 @@
  * Error Code Classification:
  * 1xx - Common errors (validation, API, network, configuration, service, rate limiting)
  * 2xx - KOELSA (Korea Elevator Safety Agency) specific errors
- * 3xx - KMA (Korea Meteorological Administration) specific errors
- * 4xx - KOTSA (Korea Transportation Safety Authority) specific errors
- * 5xx-9xx - Reserved for future agencies
+ * 3xx-9xx - Reserved for future agencies
  */
 export enum ErrorCodes {
   // 1xx - Common errors
@@ -60,21 +58,8 @@ export enum ErrorCodes {
   INVALID_ELEVATOR_TYPE = 207,
   MAINTENANCE_RECORD_NOT_FOUND = 208,
 
-  // 3xx - KMA (Korea Meteorological Administration) specific errors
-  KMA_SERVICE_ERROR = 300,
-  WEATHER_DATA_NOT_FOUND = 301,
-  INVALID_LOCATION_CODE = 302,
-  INVALID_WEATHER_DATE = 303,
-  FORECAST_NOT_AVAILABLE = 304,
-  WEATHER_STATION_NOT_FOUND = 305,
-
-  // 4xx - KOTSA (Korea Transportation Safety Authority) specific errors
-  KOTSA_SERVICE_ERROR = 400,
-  VEHICLE_NOT_FOUND = 401,
-  INVALID_VEHICLE_NUMBER = 402,
-  TRANSPORT_DATA_NOT_AVAILABLE = 403,
-  INVALID_ROUTE_CODE = 404,
-  BUS_STOP_NOT_FOUND = 405,
+  // 3xx-9xx - Reserved for future agencies
+  // Future error codes will be added here as new agencies are implemented
 }
 
 /**
@@ -133,22 +118,6 @@ export function getErrorMessage(code: ErrorCodes): string {
       "Elevator installation not found",
     [ErrorCodes.INVALID_ELEVATOR_TYPE]: "Invalid elevator type",
     [ErrorCodes.MAINTENANCE_RECORD_NOT_FOUND]: "Maintenance record not found",
-
-    // 3xx - KMA specific errors
-    [ErrorCodes.KMA_SERVICE_ERROR]: "KMA service error",
-    [ErrorCodes.WEATHER_DATA_NOT_FOUND]: "Weather data not found",
-    [ErrorCodes.INVALID_LOCATION_CODE]: "Invalid location code",
-    [ErrorCodes.INVALID_WEATHER_DATE]: "Invalid weather date",
-    [ErrorCodes.FORECAST_NOT_AVAILABLE]: "Forecast not available",
-    [ErrorCodes.WEATHER_STATION_NOT_FOUND]: "Weather station not found",
-
-    // 4xx - KOTSA specific errors
-    [ErrorCodes.KOTSA_SERVICE_ERROR]: "KOTSA service error",
-    [ErrorCodes.VEHICLE_NOT_FOUND]: "Vehicle not found",
-    [ErrorCodes.INVALID_VEHICLE_NUMBER]: "Invalid vehicle number",
-    [ErrorCodes.TRANSPORT_DATA_NOT_AVAILABLE]: "Transport data not available",
-    [ErrorCodes.INVALID_ROUTE_CODE]: "Invalid route code",
-    [ErrorCodes.BUS_STOP_NOT_FOUND]: "Bus stop not found",
   };
 
   return messages[code] || "Unknown error";
@@ -165,12 +134,8 @@ export function getErrorCategory(code: ErrorCodes): string {
       return "Common Error";
     case 2:
       return "KOELSA Error";
-    case 3:
-      return "KMA Error";
-    case 4:
-      return "KOTSA Error";
     default:
-      return "Unknown Category";
+      return "Future Agency Error";
   }
 }
 
@@ -185,7 +150,7 @@ export function isCommonError(code: ErrorCodes): boolean {
  * Check if error code is platform-specific
  */
 export function isPlatformError(code: ErrorCodes): boolean {
-  return code >= 200 && code < 500;
+  return code >= 200 && code < 300; // Currently only KOELSA (2xx)
 }
 
 /**

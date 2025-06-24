@@ -1,25 +1,51 @@
 # Korea Public SDK
 
-_Read this in [한국어](README.ko.md)_
+[![npm version](https://img.shields.io/npm/v/korea-public-sdk)](https://www.npmjs.com/package/korea-public-sdk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-16.0+-green.svg)](https://nodejs.org/)
 
-A comprehensive TypeScript SDK for accessing Korean public APIs, starting with the Korea Elevator Safety Agency (KOELSA) and designed for seamless expansion to other government agencies.
+**Professional TypeScript SDK for Korean Public Data Portal APIs**
 
-## Overview
+Korea Public SDK provides a comprehensive, type-safe interface for accessing Korean government agency APIs. Built with modern TypeScript and designed for enterprise-grade applications, it offers robust error handling, comprehensive validation, and seamless integration capabilities.
 
-Korea Public SDK provides a unified, type-safe interface for interacting with Korean public data APIs. Built with modern TypeScript, it offers robust error handling, comprehensive validation, and excellent developer experience.
+## Table of Contents
 
-### Key Features
+- [Features](#features)
+- [Supported Agencies](#supported-agencies)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [API Documentation](#api-documentation)
+- [Error Handling](#error-handling)
+- [Configuration](#configuration)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
-- **Type Safety**: Full TypeScript support with strict type checking
-- **Comprehensive Error Handling**: Detailed error classes with rich context information
-- **Input Validation**: Robust parameter validation for all API calls
-- **Extensible Architecture**: Modular design ready for additional government agencies
-- **Developer Experience**: Rich IntelliSense support and clear documentation
-- **Production Ready**: Thoroughly tested with comprehensive test coverage
+## Features
 
-### Currently Supported APIs
+- **Type Safety**: Complete TypeScript support with strict type checking and comprehensive interface definitions
+- **Robust Error Handling**: Systematic error classification with detailed error codes and contextual information
+- **Input Validation**: Comprehensive parameter validation with automatic type conversion and sanitization
+- **Modular Architecture**: Extensible design supporting multiple government agencies with isolated implementations
+- **Performance Optimized**: Efficient HTTP client with connection pooling and request optimization
+- **Production Ready**: Thoroughly tested with comprehensive test coverage and enterprise-grade reliability
+- **Developer Experience**: Rich IntelliSense support, detailed documentation, and intuitive API design
 
-- **KOELSA (Korea Elevator Safety Agency)**: Complete access to elevator installation and inspection data
+## Supported Agencies
+
+### Currently Available
+
+| Agency                                | Client         | Description                               | APIs |
+| ------------------------------------- | -------------- | ----------------------------------------- | ---- |
+| Korea Elevator Safety Agency (KOELSA) | `KOELSAClient` | Elevator installation and inspection data | 2    |
+
+### Available APIs
+
+**KOELSA (Korea Elevator Safety Agency)**
+
+- **Elevator Installation Information**: Regional and temporal elevator installation data
+- **Elevator Inspection Results**: Safety inspection results and maintenance history
 
 ## Installation
 
@@ -27,170 +53,168 @@ Korea Public SDK provides a unified, type-safe interface for interacting with Ko
 npm install korea-public-sdk
 ```
 
+**Requirements:**
+
+- Node.js 16.0 or higher
+- TypeScript 5.0 or higher (for TypeScript projects)
+
 ## Quick Start
+
+### 1. Service Key Registration
+
+Obtain a service key from the [Korean Public Data Portal](https://www.data.go.kr):
+
+1. Register for an account at data.go.kr
+2. Apply for API access to desired services
+3. Obtain the service key for your application
+
+### 2. Basic Implementation
+
+```typescript
+import { KOELSAClient } from "korea-public-sdk";
+
+// Initialize client
+const client = new KOELSAClient("your-service-key");
+
+// Query elevator installation information
+const installations = await client.installation.getInstallationList({
+  siDo: "서울특별시",
+  siGunGu: "강남구",
+  pageNo: 1,
+  numOfRows: 10,
+});
+
+// Query elevator inspection results
+const inspections = await client.inspection.getInspectionResults({
+  siDo: "서울특별시",
+  elevatorNo: "EL123456789",
+  pageNo: 1,
+  numOfRows: 10,
+});
+```
+
+### 3. Convenience Functions
 
 ```typescript
 import { createKOELSAClient } from "korea-public-sdk";
 
-// Initialize client with your service key
-const client = createKOELSAClient("your-service-key-from-data.go.kr");
-
-// Get elevator installation information
-try {
-  const installations = await client.installation.getInstallationList({
-    pageNo: 1,
-    numOfRows: 10,
-    Installation_sdt: "20240101",
-    Installation_edt: "20241231",
-  });
-
-  console.log(`Found ${installations.length} installations`);
-} catch (error) {
-  if (error instanceof ValidationError) {
-    console.error("Invalid parameters:", error.field);
-  } else if (error instanceof ElevatorNotFoundError) {
-    console.error("Elevator not found:", error.elevatorNo);
-  }
-}
+const client = createKOELSAClient("your-service-key");
+const result = await client.installation.getInstallationList(params);
 ```
 
 ## API Documentation
 
-### KOELSA Client
+### KOELSA (Korea Elevator Safety Agency)
 
-#### Installation Information Service
+#### Elevator Installation Information Service
 
 ```typescript
-// Get paginated installation list
-const result = await client.installation.getInstallationListWithPagination({
-  pageNo: 1,
-  numOfRows: 100,
-  Installation_sdt: "20240101",
-  Installation_edt: "20241231",
-  elevator_no: "optional-elevator-number",
-});
+interface ElevatorInstallationParams {
+  siDo?: string; // Administrative region (optional)
+  siGunGu?: string; // Sub-administrative region (optional)
+  installStartDate?: string; // Installation start date (optional, YYYYMMDD)
+  installEndDate?: string; // Installation end date (optional, YYYYMMDD)
+  pageNo?: number; // Page number (default: 1)
+  numOfRows?: number; // Records per page (default: 10, max: 1000)
+}
 
-// Get specific elevator information
-const elevator = await client.installation.getElevatorInstallationInfo(
-  "ELEVATOR123",
-  "20240101",
-  "20241231"
-);
+const result = await client.installation.getInstallationList(params);
 ```
 
-#### Inspection Result Service
+#### Elevator Inspection Results Service
 
 ```typescript
-// Get inspection results
-const inspections = await client.inspectResult.getInspectResultList({
-  pageNo: 1,
-  numOfRows: 50,
-  elvtrmngno_mngno: "management-code",
-});
+interface ElevatorInspectResultParams {
+  siDo?: string; // Administrative region (optional)
+  siGunGu?: string; // Sub-administrative region (optional)
+  elevatorNo?: string; // Elevator number (optional)
+  inspectStartDate?: string; // Inspection start date (optional, YYYYMMDD)
+  inspectEndDate?: string; // Inspection end date (optional, YYYYMMDD)
+  pageNo?: number; // Page number (default: 1)
+  numOfRows?: number; // Records per page (default: 10, max: 1000)
+}
+
+const result = await client.inspection.getInspectionResults(params);
 ```
 
 ## Error Handling
 
-The SDK provides detailed error information with **platform-specific numerical error codes** for robust error handling:
+Korea Public SDK implements a comprehensive error handling system with systematic error classification.
+
+### Error Code Classification
+
+- **1xx**: Common errors (shared across all agencies)
+- **2xx**: KOELSA-specific errors
+- **3xx-9xx**: Reserved for future agencies
+
+### Error Handling Implementation
 
 ```typescript
 import {
-  ValidationError,
-  ApiError,
-  NetworkError,
-  ElevatorNotFoundError,
-  WeatherStationNotFoundError,
-  VehicleNotFoundError,
   ErrorCodes,
+  ValidationError,
+  ElevatorNotFoundError,
+  getErrorMessage,
+  getErrorCategory,
+  isCommonError,
+} from "korea-public-sdk";
+
+try {
+  const result = await client.installation.getInstallationList(params);
+} catch (error) {
+  // Type-based error handling
+  if (error instanceof ValidationError) {
+    console.error("Validation failed:", error.message);
+  } else if (error instanceof ElevatorNotFoundError) {
+    console.error("Elevator not found:", error.elevatorNo);
+  }
+
+  // Code-based error handling
+  switch (error.code) {
+    case ErrorCodes.INVALID_SERVICE_KEY:
+      console.error("Invalid service key provided");
+      break;
+    case ErrorCodes.RATE_LIMIT_EXCEEDED:
+      console.error("Rate limit exceeded, please retry later");
+      break;
+    case ErrorCodes.ELEVATOR_NOT_FOUND:
+      console.error("Specified elevator not found");
+      break;
+  }
+
+  // Error categorization
+  if (isCommonError(error.code)) {
+    console.log("Common error:", getErrorMessage(error.code));
+    console.log("Category:", getErrorCategory(error.code));
+  }
+}
+```
+
+### Error Information Utilities
+
+```typescript
+import {
   getErrorMessage,
   getErrorCategory,
   isCommonError,
   isPlatformError,
 } from "korea-public-sdk";
 
-try {
-  await client.installation.getInstallationList(params);
-} catch (error) {
-  // Handle by error code
-  switch (error.code) {
-    case ErrorCodes.ELEVATOR_NOT_FOUND:
-      console.log(`Elevator ${error.elevatorNo} not found`);
-      break;
-    case ErrorCodes.RATE_LIMIT_EXCEEDED:
-      console.log("Rate limit exceeded. Please retry later.");
-      break;
-    case ErrorCodes.INVALID_DATE_FORMAT:
-      console.log("Invalid date format. Use YYYYMMDD format.");
-      break;
-    default:
-      console.log(`Error ${error.code}: ${getErrorMessage(error.code)}`);
-  }
+// Get human-readable error messages
+const message = getErrorMessage(ErrorCodes.ELEVATOR_NOT_FOUND);
 
-  // Handle by category
-  const category = getErrorCategory(error.code);
-  console.log(`Error category: ${category}`);
+// Categorize errors
+const category = getErrorCategory(error.code);
 
-  // Check if common error (affects all platforms)
-  if (isCommonError(error.code)) {
-    console.log("This is a common error that can occur on any platform");
-  }
-
-  // Check if platform-specific error
-  if (isPlatformError(error.code)) {
-    console.log("This is a platform-specific error");
-  }
-
-  // Handle by platform-specific error type
-  if (error instanceof ElevatorNotFoundError) {
-    console.log(`KOELSA: Elevator ${error.elevatorNo} not found`);
-  } else if (error instanceof WeatherStationNotFoundError) {
-    console.log(`KMA: Weather station ${error.stationId} not found`);
-  } else if (error instanceof VehicleNotFoundError) {
-    console.log(`KOTSA: Vehicle ${error.vehicleNumber} not found`);
-  }
-
-  // Handle by error type (legacy support)
-  if (error instanceof ValidationError) {
-    console.log(`Validation failed for field: ${error.field}`);
-  } else if (error instanceof ApiError) {
-    console.log(`API error ${error.statusCode}: ${error.message}`);
-  } else if (error instanceof NetworkError) {
-    console.log("Network error:", error.originalError);
-  }
+// Check error scope
+if (isCommonError(error.code)) {
+  // Handle common errors affecting all agencies
+} else if (isPlatformError(error.code)) {
+  // Handle agency-specific errors
 }
 ```
 
-### Error Code Reference
-
-For a complete list of error codes and their descriptions, see the [Error Codes Reference](ERROR_CODES.md).
-
-**New Error Code System (Platform-Based):**
-
-- **1xx**: Common errors (validation, API, network, configuration, service, rate limiting)
-- **2xx**: KOELSA (Korea Elevator Safety Agency) specific errors
-- **3xx**: KMA (Korea Meteorological Administration) specific errors (future)
-- **4xx**: KOTSA (Korea Transportation Safety Authority) specific errors (future)
-- **5xx-9xx**: Reserved for future agencies
-
-**Error Organization:**
-
-```
-src/errors/
-├── base.ts       # Base error class and ErrorCodes enum
-├── common.ts     # Common errors (1xx range)
-├── koelsa.ts     # KOELSA specific errors (2xx range)
-├── kma.ts        # KMA specific errors (3xx range)
-├── kotsa.ts      # KOTSA specific errors (4xx range)
-└── index.ts      # Centralized exports
-```
-
-**Key Benefits:**
-
-- **Platform Isolation**: Each agency gets 99 dedicated error codes (e.g., KOELSA: 200-299)
-- **Scalability**: Easy to add new agencies without conflicts
-- **Categorization**: Quickly identify error source by first digit
-- **Type Safety**: Full TypeScript enum support with helper functions
-- **Organized Structure**: Platform-specific errors grouped in dedicated files
+For comprehensive error code documentation, refer to [ERROR_CODES.md](./ERROR_CODES.md).
 
 ## Configuration
 
@@ -201,88 +225,110 @@ import { KOELSAClient } from "korea-public-sdk";
 
 const client = new KOELSAClient("your-service-key", {
   timeout: 30000,
+  baseURL: "custom-base-url",
   headers: {
-    "User-Agent": "MyApp/1.0.0",
+    "User-Agent": "MyApplication/1.0.0",
   },
 });
 ```
 
 ### Environment Variables
 
-You can set your service key as an environment variable:
-
 ```bash
+# Optional: Set service key as environment variable
 export KOREA_PUBLIC_API_KEY=your-service-key
 ```
 
 ## Development
 
-### Prerequisites
-
-- Node.js 16 or higher
-- TypeScript 5.0 or higher
-
-### Building from Source
+### Development Environment Setup
 
 ```bash
-git clone https://github.com/Higangssh/korea-public-sdk.git
+git clone https://github.com/your-username/korea-public-sdk.git
 cd korea-public-sdk
 npm install
 npm run build
+npm test
 ```
 
-### Running Tests
+### Build Scripts
+
+```bash
+npm run build          # Compile TypeScript
+npm run test           # Run test suite
+npm run test:coverage  # Run tests with coverage
+npm run lint           # Run ESLint
+npm run format         # Format code with Prettier
+```
+
+### Testing
+
+The SDK includes comprehensive test coverage:
 
 ```bash
 # Run all tests
 npm test
 
-# Run tests with coverage
-npm run test:coverage
-
-# Run specific test suites
-npm test tests/utils/validation.test.ts
+# Run specific test categories
+npm test tests/errors/
+npm test tests/utils/
+npm test tests/clients/
 ```
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with tests
-4. Ensure all tests pass
-5. Submit a pull request
-
-## API Key Requirements
-
-To use this SDK, you need to obtain a service key from the Korean Public Data Portal:
-
-1. Visit [data.go.kr](https://www.data.go.kr)
-2. Register for an account
-3. Apply for API access to the desired services
-4. Use the provided service key with this SDK
 
 ## Future Roadmap
 
-- Korea Meteorological Administration (KMA) APIs
-- Korea Transportation Safety Authority (KOTSA) APIs
-- Additional government agency APIs
-- Enhanced caching mechanisms
-- Rate limiting support
+The following government agencies are planned for future implementation:
+
+### Korea Meteorological Administration (KMA)
+
+```typescript
+// Planned implementation
+const kmaClient = new KMAClient("service-key");
+const weather = await kmaClient.weather.getCurrentWeather(params);
+const forecast = await kmaClient.forecast.getForecast(params);
+```
+
+### Korea Transportation Safety Authority (KOTSA)
+
+```typescript
+// Planned implementation
+const kotsaClient = new KOTSAClient("service-key");
+const vehicles = await kotsaClient.vehicle.getVehicleInfo(params);
+const recalls = await kotsaClient.recall.getRecallList(params);
+```
+
+### Additional Agencies
+
+Target: 300+ government agencies including:
+
+- Ministry of Environment (MOE)
+- Ministry of Land, Infrastructure and Transport (MOLIT)
+- Korea National Statistical Office (KOSIS)
+- National Information Society Agency (NIA)
+
+## Contributing
+
+We welcome contributions to Korea Public SDK. Please read our [Contributing Guide](./CONTRIBUTING.md) for details on our development process, coding standards, and submission guidelines.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-agency`)
+3. Implement changes with comprehensive tests
+4. Ensure all tests pass and code meets quality standards
+5. Submit a pull request with detailed description
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
-## Support
+## Resources
 
-- **Documentation**: [Usage Guide](docs/USAGE_GUIDE.md)
-- **Issues**: [GitHub Issues](https://github.com/Higangssh/korea-public-sdk/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Higangssh/korea-public-sdk/discussions)
+- **Documentation**: [Usage Guide](./docs/USAGE_GUIDE.md)
+- **API Reference**: [Error Codes](./ERROR_CODES.md)
+- **Issues**: [GitHub Issues](https://github.com/your-username/korea-public-sdk/issues)
+- **Korean Public Data Portal**: [data.go.kr](https://www.data.go.kr)
 
-## Acknowledgments
+## Disclaimer
 
-This project is built to facilitate access to Korean public data and is not officially affiliated with any Korean government agency.
+This project is an independent implementation and is not officially affiliated with any Korean government agency. Use in accordance with the terms of service of the respective government APIs.

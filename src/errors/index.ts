@@ -4,9 +4,9 @@
  * This file serves as the central export point for all error classes.
  * Individual error types are defined in separate files for better organization:
  *
- * - base.ts: Base error class
+ * - base.ts: Base error class and error codes
  * - common.ts: Common error types used across all agencies
- * - clients/[agency]/errors.ts: Agency-specific error types
+ * - koelsa.ts: KOELSA-specific error types
  */
 
 // Base error and error codes
@@ -37,22 +37,6 @@ export {
   KOELSAServiceError,
 } from "./koelsa";
 
-// KMA specific errors (future)
-export {
-  WeatherStationNotFoundError,
-  WeatherDataNotFoundError,
-  InvalidLocationCodeError,
-  KMAServiceError,
-} from "./kma";
-
-// KOTSA specific errors (future)
-export {
-  VehicleNotFoundError,
-  InvalidVehicleNumberError,
-  TransportDataNotAvailableError,
-  KOTSAServiceError,
-} from "./kotsa";
-
-// Future agency errors can be exported here as they are implemented
-// export { WeatherStationNotFoundError, WeatherDataUnavailableError } from './future-agencies';
-// export { InvalidVehicleRegistrationError, TransportationDataRestrictedError } from './future-agencies';
+// Future agency errors will be added here as they are implemented
+// export { WeatherStationNotFoundError, WeatherDataNotFoundError } from './kma';
+// export { VehicleNotFoundError, TransportDataNotAvailableError } from './kotsa';
