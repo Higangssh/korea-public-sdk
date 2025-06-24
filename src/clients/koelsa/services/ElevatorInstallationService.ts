@@ -23,9 +23,11 @@ import { ErrorCodes } from "../../../errors/base";
  * Elevator installation information service
  */
 export class ElevatorInstallationService implements BaseService {
-  public readonly serviceName = "ElevatorInstallationService";
+  public readonly serviceName: string;
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) {
+    this.serviceName = this.constructor.name;
+  }
 
   /**
    * Get elevator installation information list

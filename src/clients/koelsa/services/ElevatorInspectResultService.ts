@@ -19,9 +19,11 @@ import { ErrorCodes } from "../../../errors/base";
  * 승강기 검사신청결과 서비스
  */
 export class ElevatorInspectResultService implements BaseService {
-  public readonly serviceName = "ElevatorInspectResultService";
+  public readonly serviceName: string;
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) {
+    this.serviceName = this.constructor.name;
+  }
 
   /**
    * 승강기 검사신청결과 조회
