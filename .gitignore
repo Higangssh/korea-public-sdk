@@ -28,6 +28,9 @@ coverage/
 *.swo
 .cursorrules
 
+# Rollup 설정 캐시
+.rollup.cache
+
 # OS
 .DS_Store
 Thumbs.db

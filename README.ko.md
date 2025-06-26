@@ -1,6 +1,6 @@
 # Korea Public SDK
 
-[![npm version](https://img.shields.io/npm/v/korea-public-sdk)](https://www.npmjs.com/package/korea-public-sdk)
+[![npm version](https://img.shields.io/npm/v/@son/korea-public-sdk)](https://www.npmjs.com/package/@son/korea-public-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-16.0+-green.svg)](https://nodejs.org/)
@@ -54,8 +54,11 @@ Korea Public SDK는 한국 정부기관 API에 대한 포괄적이고 타입 안
 ## 설치
 
 ```bash
-npm install korea-public-sdk
+# SDK와 axios(피어 의존성)를 함께 설치
+npm install @son/korea-public-sdk axios
 ```
+
+> **참고**: axios는 피어 의존성이므로 별도로 설치해야 합니다.
 
 **요구사항:**
 
@@ -106,7 +109,7 @@ npm install korea-public-sdk
 ### 1. 기본 구현
 
 ```typescript
-import { KOELSAClient } from "korea-public-sdk";
+import { KOELSAClient } from "@son/korea-public-sdk";
 
 // 서비스 키로 클라이언트 초기화
 const client = new KOELSAClient("your-service-key");
@@ -142,7 +145,7 @@ const client = new KOELSAClient(process.env.KOELSA_SERVICE_KEY);
 ### 3. 오류 처리
 
 ```typescript
-import { ApiError, ValidationError } from "korea-public-sdk";
+import { ApiError, ValidationError } from "@son/korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
@@ -212,7 +215,7 @@ import {
   NetworkError,
   ElevatorNotFoundError,
   KOELSAServiceError,
-} from "korea-public-sdk";
+} from "@son/korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
@@ -275,7 +278,7 @@ npm run test:integration
 ### 클라이언트 설정
 
 ```typescript
-import { KOELSAClient } from "korea-public-sdk";
+import { KOELSAClient } from "@son/korea-public-sdk";
 
 const client = new KOELSAClient("your-service-key", {
   timeout: 30000,
@@ -304,7 +307,7 @@ console.log("사용 가능한 서비스:", info.services);
 ### 개발 환경 설정
 
 ```bash
-git clone https://github.com/your-username/korea-public-sdk.git
+git clone https://github.com/Higangssh/korea-public-sdk.git
 cd korea-public-sdk
 npm install
 npm run build
@@ -385,7 +388,7 @@ Korea Public SDK에 대한 기여를 환영합니다. 개발 프로세스, 코�
 
 - **문서**: [사용 가이드](./docs/USAGE_GUIDE.md)
 - **API 참조**: [오류 코드](./ERROR_CODES.md)
-- **이슈**: [GitHub 이슈](https://github.com/your-username/korea-public-sdk/issues)
+- **이슈**: [GitHub 이슈](https://github.com/Higangssh/korea-public-sdk/issues)
 - **공공데이터포털**: [data.go.kr](https://www.data.go.kr)
 
 ## 면책조항

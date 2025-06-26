@@ -1,6 +1,6 @@
 # Korea Public SDK
 
-[![npm version](https://img.shields.io/npm/v/korea-public-sdk)](https://www.npmjs.com/package/korea-public-sdk)
+[![npm version](https://img.shields.io/npm/v/@son/korea-public-sdk)](https://www.npmjs.com/package/@son/korea-public-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-16.0+-green.svg)](https://nodejs.org/)
@@ -56,8 +56,11 @@ validation, and seamless integration capabilities.
 ## Installation
 
 ```bash
-npm install korea-public-sdk
+# Install the SDK and axios (peer dependency)
+npm install @son/korea-public-sdk axios
 ```
+
+> **Note**: axios is a peer dependency and must be installed separately.
 
 **Requirements:**
 
@@ -108,7 +111,7 @@ To use this SDK, you need to obtain service keys from the Korean Public Data Por
 ### 1. Basic Implementation
 
 ```typescript
-import { KOELSAClient } from "korea-public-sdk";
+import { KOELSAClient } from "@son/korea-public-sdk";
 
 // Initialize client with your service key
 const client = new KOELSAClient("your-service-key");
@@ -144,7 +147,7 @@ const client = new KOELSAClient(process.env.KOELSA_SERVICE_KEY);
 ### 3. Error Handling
 
 ```typescript
-import { ApiError, ValidationError } from "korea-public-sdk";
+import { ApiError, ValidationError } from "@son/korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
@@ -214,7 +217,7 @@ import {
   NetworkError,
   ElevatorNotFoundError,
   KOELSAServiceError,
-} from "korea-public-sdk";
+} from "@son/korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
@@ -277,7 +280,7 @@ The tests verify:
 ### Client Configuration
 
 ```typescript
-import { KOELSAClient } from "korea-public-sdk";
+import { KOELSAClient } from "@son/korea-public-sdk";
 
 const client = new KOELSAClient("your-service-key", {
   timeout: 30000,
@@ -306,7 +309,7 @@ console.log("Available services:", info.services);
 ### Development Environment Setup
 
 ```bash
-git clone https://github.com/your-username/korea-public-sdk.git
+git clone https://github.com/Higangssh/korea-public-sdk.git
 cd korea-public-sdk
 npm install
 npm run build
@@ -387,7 +390,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 - **Documentation**: [Usage Guide](./docs/USAGE_GUIDE.md)
 - **API Reference**: [Error Codes](./ERROR_CODES.md)
-- **Issues**: [GitHub Issues](https://github.com/your-username/korea-public-sdk/issues)
+- **Issues**: [GitHub Issues](https://github.com/Higangssh/korea-public-sdk/issues)
 - **Korean Public Data Portal**: [data.go.kr](https://www.data.go.kr)
 
 ## Disclaimer
