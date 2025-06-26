@@ -11,11 +11,11 @@ import {
   ElevatorInstallationResponse,
   ElevatorInstallationInfo,
 } from "../types";
-import { 
-  ApiError, 
+import {
+  ApiError,
   ValidationError,
   ElevatorNotFoundError,
-  KOELSAServiceError 
+  KOELSAServiceError,
 } from "../../../errors";
 import { ErrorCodes } from "../../../errors/base";
 
@@ -25,7 +25,7 @@ import { ErrorCodes } from "../../../errors/base";
 export class ElevatorInstallationService implements BaseService {
   public readonly serviceName: string;
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private readonly httpClient: HttpClient) {
     this.serviceName = this.constructor.name;
   }
 
@@ -49,7 +49,7 @@ export class ElevatorInstallationService implements BaseService {
     // 응답 검증 및 적절한 에러 처리
     const resultCode = response.data.response?.header?.resultCode;
     const resultMsg = response.data.response?.header?.resultMsg;
-    
+
     if (resultCode !== "00") {
       // API 응답 코드에 따른 구체적인 에러 처리
       if (resultCode === "03") {
@@ -74,7 +74,7 @@ export class ElevatorInstallationService implements BaseService {
 
     const items = response.data.response?.body?.items;
     // 실제 데이터는 items.item 배열에 있음
-    if (items && typeof items === 'object' && Array.isArray(items.item)) {
+    if (items && typeof items === "object" && Array.isArray(items.item)) {
       return items.item;
     }
     // 데이터가 없으면 빈 배열
@@ -101,7 +101,7 @@ export class ElevatorInstallationService implements BaseService {
     // 응답 검증 및 적절한 에러 처리
     const resultCode = response.data.response?.header?.resultCode;
     const resultMsg = response.data.response?.header?.resultMsg;
-    
+
     if (resultCode !== "00") {
       // API 응답 코드에 따른 구체적인 에러 처리
       if (resultCode === "03") {
@@ -166,7 +166,11 @@ export class ElevatorInstallationService implements BaseService {
     }
 
     // 시작일이 종료일보다 늦지 않은지 확인
-    if (params.Installation_sdt && params.Installation_edt && params.Installation_sdt > params.Installation_edt) {
+    if (
+      params.Installation_sdt &&
+      params.Installation_edt &&
+      params.Installation_sdt > params.Installation_edt
+    ) {
       throw new ValidationError(
         "시작일이 종료일보다 늦을 수 없습니다.",
         "Installation_sdt",

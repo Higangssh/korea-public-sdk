@@ -1,10 +1,12 @@
 # Contributing to Korea Public SDK
 
-Thank you for your interest in contributing to Korea Public SDK! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Korea Public SDK! This document provides guidelines and information for
+contributors.
 
 ## Code of Conduct
 
-This project adheres to a code of conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+This project adheres to a code of conduct. By participating, you are expected to uphold this code. Please report
+unacceptable behavior to the project maintainers.
 
 ## How to Contribute
 

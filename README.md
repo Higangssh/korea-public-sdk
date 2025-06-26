@@ -7,7 +7,9 @@
 
 **Professional TypeScript SDK for Korean Public Data Portal APIs**
 
-Korea Public SDK provides a comprehensive, type-safe interface for accessing Korean government agency APIs. Built with modern TypeScript and designed for enterprise-grade applications, it offers robust error handling, comprehensive validation, and seamless integration capabilities.
+Korea Public SDK provides a comprehensive, type-safe interface for accessing Korean government agency APIs. Built with
+modern TypeScript and designed for enterprise-grade applications, it offers robust error handling, comprehensive
+validation, and seamless integration capabilities.
 
 ## Table of Contents
 
@@ -47,7 +49,8 @@ Korea Public SDK provides a comprehensive, type-safe interface for accessing Kor
 **KOELSA (Korea Elevator Safety Agency)**
 
 - **Elevator Installation Information**: Regional and temporal elevator installation data (3 methods)
-- **Elevator Inspection Results**: Safety inspection results and maintenance history (4 methods, requires valid management codes)
+- **Elevator Inspection Results**: Safety inspection results and maintenance history (4 methods, requires valid
+  management codes)
 - **Health Check & Client Info**: Service status and client information (2 methods)
 
 ## Installation
@@ -263,6 +266,7 @@ npm run test:integration
 ```
 
 The tests verify:
+
 - API calls execute successfully with real data
 - Standard public data API response structure (`response.header.resultCode`, `response.body`) is maintained
 - SDK error handling works correctly
@@ -364,7 +368,8 @@ Target: 300+ government agencies including:
 
 ## Contributing
 
-We welcome contributions to Korea Public SDK. Please read our [Contributing Guide](./CONTRIBUTING.md) for details on our development process, coding standards, and submission guidelines.
+We welcome contributions to Korea Public SDK. Please read our [Contributing Guide](./CONTRIBUTING.md) for details on our
+development process, coding standards, and submission guidelines.
 
 ### Development Workflow
 
@@ -387,4 +392,5 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ## Disclaimer
 
-This project is an independent implementation and is not officially affiliated with any Korean government agency. Use in accordance with the terms of service of the respective government APIs.
+This project is an independent implementation and is not officially affiliated with any Korean government agency. Use in
+accordance with the terms of service of the respective government APIs.

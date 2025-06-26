@@ -7,7 +7,7 @@ import { ErrorCodes } from "../errors/base";
  * HTTP client utility class for handling API requests
  */
 export class HttpClient {
-  private client: AxiosInstance;
+  private readonly client: AxiosInstance;
 
   constructor(config: ClientConfig) {
     this.client = axios.create({

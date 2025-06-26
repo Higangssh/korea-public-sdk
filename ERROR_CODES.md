@@ -26,8 +26,7 @@ Korea Public SDK에서 사용되는 모든 에러 코드의 완전한 참조 가
 
 ## 1xx - 공통 에러
 
-모든 API 클라이언트에서 공통으로 발생할 수 있는 에러들입니다.
-**파일 위치**: `src/errors/common.ts`
+모든 API 클라이언트에서 공통으로 발생할 수 있는 에러들입니다. **파일 위치**: `src/errors/common.ts`
 
 ### 기본 에러
 
@@ -106,8 +105,7 @@ API 사용량 제한과 관련된 에러들입니다.
 
 ## 2xx - KOELSA 에러
 
-한국승강기안전공단(KOELSA) API 전용 에러들입니다.
-**파일 위치**: `src/errors/koelsa.ts`
+한국승강기안전공단(KOELSA) API 전용 에러들입니다. **파일 위치**: `src/errors/koelsa.ts`
 
 ### 기본 KOELSA 에러
 
@@ -180,11 +178,7 @@ API 사용량 제한과 관련된 에러들입니다.
 ### TypeScript/JavaScript
 
 ```typescript
-import {
-  ErrorCodes,
-  getErrorMessage,
-  getErrorCategory,
-} from "korea-public-sdk";
+import { ErrorCodes, getErrorMessage, getErrorCategory } from "korea-public-sdk";
 
 try {
   // API 호출
@@ -213,4 +207,5 @@ if (isCommonError(error.code)) {
 
 ## 문의
 
-에러 코드에 대한 추가 정보나 새로운 에러 코드 제안은 [GitHub Issues](https://github.com/your-repo/korea-public-sdk/issues)를 통해 문의해 주세요.
+에러 코드에 대한 추가 정보나 새로운 에러 코드 제안은
+[GitHub Issues](https://github.com/your-repo/korea-public-sdk/issues)를 통해 문의해 주세요.

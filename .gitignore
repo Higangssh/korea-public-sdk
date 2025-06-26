@@ -26,6 +26,7 @@ coverage/
 .idea/
 *.swp
 *.swo
+.cursorrules
 
 # OS
 .DS_Store

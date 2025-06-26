@@ -6,12 +6,12 @@ import {
   ElevatorInspectResultResponse,
   ElevatorInspectResultInfo,
 } from "../types";
-import { 
-  ApiError, 
+import {
+  ApiError,
   ValidationError,
   ElevatorNotFoundError,
   KOELSAServiceError,
-  InvalidManagementCodeError 
+  InvalidManagementCodeError,
 } from "../../../errors";
 import { ErrorCodes } from "../../../errors/base";
 
@@ -21,7 +21,7 @@ import { ErrorCodes } from "../../../errors/base";
 export class ElevatorInspectResultService implements BaseService {
   public readonly serviceName: string;
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private readonly httpClient: HttpClient) {
     this.serviceName = this.constructor.name;
   }
 
@@ -45,7 +45,7 @@ export class ElevatorInspectResultService implements BaseService {
     // 응답 검증 및 적절한 에러 처리
     const resultCode = response.data.response?.header?.resultCode;
     const resultMsg = response.data.response?.header?.resultMsg;
-    
+
     if (resultCode !== "00") {
       // API 응답 코드에 따른 구체적인 에러 처리
       if (resultCode === "03") {
@@ -70,7 +70,7 @@ export class ElevatorInspectResultService implements BaseService {
 
     const items = response.data.response?.body?.items;
     // 실제 데이터는 items.item 배열에 있음
-    if (items && typeof items === 'object' && Array.isArray(items.item)) {
+    if (items && typeof items === "object" && Array.isArray(items.item)) {
       return items.item;
     }
     // 데이터가 없으면 빈 배열
@@ -97,7 +97,7 @@ export class ElevatorInspectResultService implements BaseService {
     // 응답 검증 및 적절한 에러 처리
     const resultCode = response.data.response?.header?.resultCode;
     const resultMsg = response.data.response?.header?.resultMsg;
-    
+
     if (resultCode !== "00") {
       // API 응답 코드에 따른 구체적인 에러 처리
       if (resultCode === "03") {
@@ -145,7 +145,7 @@ export class ElevatorInspectResultService implements BaseService {
   }
 
   /**
-   * 
+   *
    * @param params 조회 파라미터
    * @returns 검사신청결과 목록
    */
