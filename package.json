@@ -20,7 +20,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "rollup -c",
+    "build": "tsc && rollup -c",
     "build:dev": "rollup -c --watch",
     "dev": "tsc --watch",
     "test": "jest",
