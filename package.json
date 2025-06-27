@@ -35,7 +35,11 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"examples/**/*.ts\" \"*.{js,json,md}\"",
     "clean": "rimraf lib",
     "prepublishOnly": "npm run clean && npm run build && npm test",
-    "size-check": "echo 'Bundle sizes:' && ls -la lib/*.js | grep -E '\\.(js)$'"
+    "size-check": "echo 'Bundle sizes:' && ls -la lib/*.js | grep -E '\\.(js)$'",
+    "release:patch": "npm version patch && git push && git push --tags && npm publish",
+    "release:minor": "npm version minor && git push && git push --tags && npm publish",
+    "release:major": "npm version major && git push && git push --tags && npm publish",
+    "release": "npm run release:patch"
   },
   "keywords": [
     "korea",
