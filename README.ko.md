@@ -1,6 +1,6 @@
 # Korea Public SDK
 
-[![npm version](https://img.shields.io/npm/v/@son/korea-public-sdk)](https://www.npmjs.com/package/@son/korea-public-sdk)
+[![npm version](https://img.shields.io/npm/v/@sanghee/korea-public-sdk)](https://www.npmjs.com/package/@sanghee/korea-public-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-16.0+-green.svg)](https://nodejs.org/)
@@ -55,7 +55,7 @@ Korea Public SDK는 한국 정부기관 API에 대한 포괄적이고 타입 안
 
 ```bash
 # SDK와 axios(피어 의존성)를 함께 설치
-npm install @son/korea-public-sdk axios
+npm install @sanghee/korea-public-sdk axios
 ```
 
 > **참고**: axios는 피어 의존성이므로 별도로 설치해야 합니다.
@@ -109,7 +109,7 @@ npm install @son/korea-public-sdk axios
 ### 1. 기본 구현
 
 ```typescript
-import { KOELSAClient } from "@son/korea-public-sdk";
+import { KOELSAClient } from "@sanghee/korea-public-sdk";
 
 // 서비스 키로 클라이언트 초기화
 const client = new KOELSAClient("your-service-key");
@@ -145,7 +145,7 @@ const client = new KOELSAClient(process.env.KOELSA_SERVICE_KEY);
 ### 3. 오류 처리
 
 ```typescript
-import { ApiError, ValidationError } from "@son/korea-public-sdk";
+import { ApiError, ValidationError } from "@sanghee/korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
@@ -215,7 +215,7 @@ import {
   NetworkError,
   ElevatorNotFoundError,
   KOELSAServiceError,
-} from "@son/korea-public-sdk";
+} from "@sanghee/korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
@@ -278,7 +278,7 @@ npm run test:integration
 ### 클라이언트 설정
 
 ```typescript
-import { KOELSAClient } from "@son/korea-public-sdk";
+import { KOELSAClient } from "@sanghee/korea-public-sdk";
 
 const client = new KOELSAClient("your-service-key", {
   timeout: 30000,

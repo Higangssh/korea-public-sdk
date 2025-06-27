@@ -1,6 +1,8 @@
 # Korea Public SDK
 
-[![npm version](https://img.shields.io/npm/v/@son/korea-public-sdk)](https://www.npmjs.com/package/@son/korea-public-sdk)
+*[한국어로 보기](README.ko.md)*
+
+[![npm version](https://img.shields.io/npm/v/@sanghee/korea-public-sdk)](https://www.npmjs.com/package/@sanghee/korea-public-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-16.0+-green.svg)](https://nodejs.org/)
@@ -57,7 +59,7 @@ validation, and seamless integration capabilities.
 
 ```bash
 # Install the SDK and axios (peer dependency)
-npm install @son/korea-public-sdk axios
+npm install @sanghee/korea-public-sdk axios
 ```
 
 > **Note**: axios is a peer dependency and must be installed separately.
@@ -111,7 +113,7 @@ To use this SDK, you need to obtain service keys from the Korean Public Data Por
 ### 1. Basic Implementation
 
 ```typescript
-import { KOELSAClient } from "@son/korea-public-sdk";
+import { KOELSAClient } from "@sanghee/korea-public-sdk";
 
 // Initialize client with your service key
 const client = new KOELSAClient("your-service-key");
@@ -147,7 +149,7 @@ const client = new KOELSAClient(process.env.KOELSA_SERVICE_KEY);
 ### 3. Error Handling
 
 ```typescript
-import { ApiError, ValidationError } from "@son/korea-public-sdk";
+import { ApiError, ValidationError } from "@sanghee/korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
@@ -217,7 +219,7 @@ import {
   NetworkError,
   ElevatorNotFoundError,
   KOELSAServiceError,
-} from "@son/korea-public-sdk";
+} from "@sanghee/korea-public-sdk";
 
 try {
   const result = await client.installation.getInstallationList(params);
@@ -280,7 +282,7 @@ The tests verify:
 ### Client Configuration
 
 ```typescript
-import { KOELSAClient } from "@son/korea-public-sdk";
+import { KOELSAClient } from "@sanghee/korea-public-sdk";
 
 const client = new KOELSAClient("your-service-key", {
   timeout: 30000,
