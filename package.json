@@ -1,5 +1,5 @@
 {
-  "name": "@son/korea-public-sdk",
+  "name": "@sanghee/korea-public-sdk",
   "version": "1.0.0",
   "description": "A comprehensive TypeScript SDK for accessing Korean public APIs",
   "main": "lib/index.js",
